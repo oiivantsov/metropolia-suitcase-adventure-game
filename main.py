@@ -8,7 +8,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='MetroSuomi2024',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -48,5 +48,38 @@ def distance_calcs(icao1, icao2):  # returns km between two airports in kilomete
 # example ICAOs: EGSS, VHHH
 print(distance_calcs("EGSS", "VHHH"))  # comment later
 
+def register_user():
+    user_name = input("Enter your name: ")
+    # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
+    while len(user_name) < 6 or len(user_name) > 20:
+        print("Username must be between 6 and 20 characters long.")
+        user_name = input("Enter your name: ")
 
+    # Check if the username already exists in the database
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM player WHERE name = %s", (user_name,))
+    existing_user = cursor.fetchone()
+    if existing_user:
+        print("Username already exists. Please choose another username.")
+        register_user()  # Restart the registration process
+        return
 
+    password = input("Enter your password: ")
+    # Check if password length is less than 4, prompt until valid input is provided
+    while len(password) < 4:
+        print("Password must be at least 4 characters long.")
+        password = input("Enter your password: ")
+
+    # Find the maximum id value currently in use
+    cursor.execute("SELECT MAX(id) FROM player")
+    max_id_result = cursor.fetchone()
+    max_id = max_id_result[0] if max_id_result[0] is not None else 0
+
+    # Insert the airport into the MySQL database with a new id
+    new_id = max_id + 1
+    # Insert the airport into the MySQL database
+    insert_query = "INSERT INTO player (id, name, password) VALUES (%s, %s, %s)"
+    cursor.execute(insert_query, (new_id, user_name, password))
+    print(f"User {user_name} successfully registered.")
+
+register_user()
