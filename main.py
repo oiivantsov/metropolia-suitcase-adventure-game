@@ -1,6 +1,7 @@
 import mysql.connector
 import sys
 from geopy.distance import distance
+import random
 
 try:
     connection = mysql.connector.connect(
@@ -15,6 +16,33 @@ try:
 except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
+
+def menu():
+    print("1. Login")
+    print("2. Registration")
+    print("3. Exit")
+    print("4. Statistics")
+
+    choice = int(input("Enter your choice: "))
+
+    if choice == 1:
+        # login()
+        pass
+
+    elif choice == 2:
+        # register()
+        pass
+
+    elif choice == 3:
+        exit()
+
+    elif choice == 4:
+        # statistics()
+        pass
+
+    else:
+        print("The input is incorrect, please try again")
+
 
 
 def distance_calcs(icao1, icao2):  # returns km between two airports in kilometers (integer)
@@ -45,8 +73,35 @@ def distance_calcs(icao1, icao2):  # returns km between two airports in kilomete
     return distance(coordinates[0], coordinates[1]).km
 
 
-# example ICAOs: EGSS, VHHH
-print(distance_calcs("EGSS", "VHHH"))  # comment later
+def fetch_all_large():  # (technical function) return the list of 451 airports' ICAO-codes
+    try:
+        with connection.cursor() as mycursor:
+            sql = """ 
+            SELECT ident FROM airport
+            WHERE airport.type = "large_airport";
+            """
+
+            mycursor.execute(sql)
+            myresult = mycursor.fetchall()
+
+            return [i[0] for i in myresult]
+
+    except mysql.connector.Error as err:
+        print("Something went wrong: {}".format(err))
+        return []
+
+
+def start_locations():  # returns the list of 2 random ICAO-codes from 451 airports
+    all_locations = fetch_all_large()
+
+    if len(all_locations) < 2:
+        print("Error")
+        return None
+
+    icao1 = all_locations.pop(random.choice(range(len(all_locations))))
+    icao2 = all_locations.pop(random.choice(range(len(all_locations))))
+
+    return [icao1, icao2]
 
 def register_user():
     user_name = input("Enter your name: ")
