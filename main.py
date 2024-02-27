@@ -51,13 +51,14 @@ print(distance_calcs("EGSS", "VHHH"))  # comment later
 def register_user():
     user_name = input("Enter your name: ")
     # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
-    while len(user_name) < 6 or len(user_name) > 20:
-        print("Username must be between 6 and 20 characters long.")
+    while len(user_name) < 4 or len(user_name) > 20:      # changed 6 to 4 minimum because 6 is too long
+        print("Username must be between 4 and 20 characters long.")
         user_name = input("Enter your name: ")
 
     # Check if the username already exists in the database
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM player WHERE name = %s", (user_name,))
+    select_name_query = f"""SELECT name FROM player WHERE name = "{user_name}";"""
+    cursor.execute(select_name_query)
     existing_user = cursor.fetchone()
     if existing_user:
         print("Username already exists. Please choose another username.")
@@ -81,5 +82,6 @@ def register_user():
     insert_query = "INSERT INTO player (id, name, password) VALUES (%s, %s, %s)"
     cursor.execute(insert_query, (new_id, user_name, password))
     print(f"User {user_name} successfully registered.")
+    connection.close()
 
 register_user()
