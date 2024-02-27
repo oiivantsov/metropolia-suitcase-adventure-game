@@ -17,6 +17,33 @@ except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
+def menu():
+    print("1. Login")
+    print("2. Registration")
+    print("3. Exit")
+    print("4. Statistics")
+
+    choice = int(input("Enter your choice: "))
+
+    if choice == 1:
+        # login()
+        pass
+
+    elif choice == 2:
+        # register()
+        pass
+
+    elif choice == 3:
+        exit()
+
+    elif choice == 4:
+        # statistics()
+        pass
+
+    else:
+        print("The input is incorrect, please try again")
+
+
 
 def distance_calcs(icao1, icao2):  # returns km between two airports in kilometers (integer)
 
