@@ -87,5 +87,5 @@ def register_user():
     insert_query = "INSERT INTO player (id, name, password) VALUES (%s, %s, %s)"
     cursor.execute(insert_query, (new_id, user_name, password))
     print(f"User {user_name} successfully registered.")
-    connection.close()
+    cursor.close()
 register_user()
