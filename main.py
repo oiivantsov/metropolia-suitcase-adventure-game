@@ -226,3 +226,17 @@ def register_user():
     cursor.execute(insert_query, (new_id, user_name, password))
     print(f"User {user_name} successfully registered.")
     cursor.close()
+
+
+# Requests game statistics from the database and prints them.
+def statistics() -> None:
+    result = database_query("SELECT AVG(co2_consumed), AVG(flights_num), COUNT(*) FROM game WHERE completed = 1")
+    co2_average, flights_average, game_count = result[0]
+
+    if game_count == 0 or co2_average is None or flights_average is None:
+        print("\nNo statistics available.\n")
+        return
+
+    print(f"\nStatistics for all {game_count} completed games:")
+    print(f"Average co2 consumption: {co2_average:.1f}")
+    print(f"Average flight amount: {flights_average:.1f}\n")
