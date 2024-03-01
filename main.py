@@ -1,6 +1,7 @@
 import mysql.connector
 import sys
 from geopy.distance import distance
+import banner
 
 try:
     connection = mysql.connector.connect(
@@ -16,6 +17,10 @@ except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
+banner.printBanner()  # to print banner (code is in the file "banner")
+
+# pause
+input("\033[32mPress [Enter] to continue...\033[0m")
 
 def distance_calcs(icao1, icao2):  # returns km between two airports in kilometers (integer)
 
@@ -46,7 +51,7 @@ def distance_calcs(icao1, icao2):  # returns km between two airports in kilomete
 
 
 # example ICAOs: EGSS, VHHH
-print(distance_calcs("EGSS", "VHHH"))  # comment later
+# print(distance_calcs("EGSS", "VHHH"))  # comment later
 
 def register_user():
     user_name = input("Enter your name: ")
@@ -83,5 +88,4 @@ def register_user():
     cursor.execute(insert_query, (new_id, user_name, password))
     print(f"User {user_name} successfully registered.")
     connection.close()
-
 register_user()
