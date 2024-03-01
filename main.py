@@ -1,11 +1,8 @@
 import mysql.connector
 import sys
 from geopy.distance import distance
-<<<<<<< HEAD
 import banner
-=======
 import random
->>>>>>> 79a13ff2a41b6ed93150495ee3fff9e6adab7314
 
 try:
     connection = mysql.connector.connect(
@@ -21,12 +18,11 @@ except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
-<<<<<<< HEAD
 banner.printBanner()  # to print banner (code is in the file "banner")
 
 # pause
 input("\033[32mPress [Enter] to continue...\033[0m")
-=======
+
 def menu():
     print("1. Login")
     print("2. Registration")
@@ -53,8 +49,6 @@ def menu():
     else:
         print("The input is incorrect, please try again")
 
-
->>>>>>> 79a13ff2a41b6ed93150495ee3fff9e6adab7314
 
 def distance_calcs(icao1, icao2):  # returns km between two airports in kilometers (integer)
 
@@ -84,10 +78,9 @@ def distance_calcs(icao1, icao2):  # returns km between two airports in kilomete
     return distance(coordinates[0], coordinates[1]).km
 
 
-<<<<<<< HEAD
 # example ICAOs: EGSS, VHHH
 # print(distance_calcs("EGSS", "VHHH"))  # comment later
-=======
+
 def fetch_all_large():  # (technical function) return the list of 451 airports' ICAO-codes
     try:
         with connection.cursor() as mycursor:
@@ -117,7 +110,6 @@ def start_locations():  # returns the list of 2 random ICAO-codes from 451 airpo
     icao2 = all_locations.pop(random.choice(range(len(all_locations))))
 
     return [icao1, icao2]
->>>>>>> 79a13ff2a41b6ed93150495ee3fff9e6adab7314
 
 def register_user():
     user_name = input("Enter your name: ")
@@ -154,4 +146,3 @@ def register_user():
     cursor.execute(insert_query, (new_id, user_name, password))
     print(f"User {user_name} successfully registered.")
     cursor.close()
-register_user()
