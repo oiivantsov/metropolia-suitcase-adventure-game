@@ -192,7 +192,7 @@ def flights_divisible_by_5(flights_num) -> bool:
     """
     checks if the number of flights is divisible by 5
     """
-    if flights_num > 0 and flights_num % 5:
+    if flights_num > 0 and flights_num % 5 == 0:
         return True
 
 
