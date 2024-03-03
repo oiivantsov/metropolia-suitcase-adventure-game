@@ -231,34 +231,3 @@ def register_user():
     cursor.execute(insert_query, (new_id, user_name, password))
     print(f"User {user_name} successfully registered.")
     cursor.close()
-
-
-# ----- TESTS (delete later)
-
-# # list of 451 airports, Oleg later adds new table to database (game_id, available_airport_ident)
-# available_airports = fetch_all_large()
-# '''
-# 1) new game created
-# 2) list of available airports created by python func
-# 3) available airports go to SQL (game_id, available_airport_ident)-table
-# 4) after each random functions, available_ident is deleted from (game_id, available_airport_ident)-table
-# 5) available airports will saved if player exits from game, and guess function will work well
-#
-# 6) when game loaded, no need to create to available airports, we just load them from existing SQL-table
-# '''
-#
-# flights = 0
-# emissions = 0
-#
-# player_location = random_location(available_airports) # new ICAO and minus 1 airports from available_airports (if new login)
-# target_location = random_location(available_airports) # new ICAO and minus 1 airports from available_airports (if new login)
-# current_distance = distance_calcs(player_location, target_location)
-#
-#
-# if flights_divisible_by_5(flights):
-#     target_location = random_location(available_airports)
-#
-#
-# print(player_location)
-# print(target_location)
-# print(current_distance)
