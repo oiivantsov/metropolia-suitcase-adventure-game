@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='MetroSuomi2024',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -39,8 +39,9 @@ def menu():
             print("You've chosen to exit the game. We hope to see you again soon!")
             sys.exit(1)
         elif choice == "4":
-            # statistics()
-            break
+            statistics()
+            input("Press [ENTER] to continue...")
+            menu()
         else:
             print(f"Incorrect! Select the number from 1 to 4, please try again!")
             continue
@@ -186,10 +187,7 @@ def random_location(airports) -> str:
     return new_icao
 
 
-def flights_divisible_by_5(flights_num) -> bool:
-    """
-    checks if the number of flights is divisible by 5
-    """
+def flights_divisible_by_5(flights_num) -> bool:     # checks if the number of flights is divisible by 5
     if flights_num > 0 and flights_num % 5 == 0:
         return True
 
@@ -222,6 +220,7 @@ def register_user():
         password = input("Enter your password: ")
 
     # Find the maximum id value currently in use
+    cursor = connection.cursor()
     cursor.execute("SELECT MAX(id) FROM player")
     max_id_result = cursor.fetchone()
     max_id = max_id_result[0] if max_id_result[0] is not None else 0
@@ -269,11 +268,36 @@ def statistics() -> None:
     print(f"Average flight amount: {flights_average:.1f}\n")
 
 
+def game():
+    print("Explaining how to play...")  # rules will be here
+    cursor = connection.cursor()
+    # Find the maximum id value currently in use
+    cursor.execute("SELECT MAX(id) FROM game")
+    max_id_result = cursor.fetchone()
+    max_id = max_id_result[0] if max_id_result[0] is not None else 0
+    game_id = max_id + 1                          # create id for the game
+
+    airports = fetch_all_large()                  # get list of the airports
+    current_location = random_location(airports)  # get start/current location
+    target_location = random_location(airports)     # get goal location
+    flights_num = 0                               # set flights_num as 0 at the beginning
+    insert_query = "INSERT INTO game (id, current_location, target_location, flights_num) VALUES (%s, %s, %s, %s)"
+    cursor.execute(insert_query, (game_id, current_location, target_location, flights_num))
+    while (True):
+        print_game_state(game_id)
+        current_location = airport_input()
+        flights_num += 1
+        update_query = "UPDATE game SET current_location = %s, target_location = %s WHERE id = %s;"
+        cursor.execute(update_query, (current_location, target_location, game_id))
+        if current_location == target_location:
+            break
+        #if flights_divisible_by_5(flights_num):
+            #goal_location = random_location(airports)
+
+
 def main_game():    # main game flow
-    #banner.printBanner()  # to print banner (code is in the file "banner")
+    #banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
     #menu()
-    #airports = start_locations()
-    #print(f"You are in {airports[0]}. The distance to the suitcase is {distance_calcs(airports[0], airports[1]):.2f} km")
-    airport_input()
+    game()
 
 main_game()
