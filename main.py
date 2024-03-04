@@ -66,6 +66,22 @@ def login():
     else:
         print("Sorry, wrong username or password. Try again.")
 
+def start_option():
+    print("1. Start the game")
+    print("2. Continue the game")
+
+    choice = int(input("Enter your choice: "))
+
+    if choice == 1:
+        #new_game()
+    elif choice == 2:
+        #continue_game()
+    else:
+        print("invalid choice")
+
+
+
+
 # Reads user input for the airport. Returns ICAO code of the selected airport.
 def airport_input() -> str:
     # Get all available continent from the database
