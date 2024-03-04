@@ -51,7 +51,7 @@ def menu():
 # Reads user input for the airport. Returns ICAO code of the selected airport.
 def airport_input() -> str:
     # Get all available continent from the database
-    continents = database_query("SELECT DISTINCT continent FROM country ORDER BY continent")
+    continents = database_query("SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' GROUP BY country.continent")
     continent_options = [continent[0].lower() for continent in continents]
 
     while True:
@@ -66,7 +66,7 @@ def airport_input() -> str:
         selected_continent = select_option(continent_options, "Select continent: ", "The continent doesn't exist.")
 
         # Selection of country
-        countries = database_query(f"SELECT iso_country, name FROM country WHERE continent = '{selected_continent}'")
+        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
 
         print("\nAvailable countries in the selected continent:")
         for country in countries:
