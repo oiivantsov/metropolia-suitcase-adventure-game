@@ -10,7 +10,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='MetroSuomi2024',  # change it to your password
+        password='metro0',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -48,8 +48,6 @@ def menu():
 
     else:
         print("The input is incorrect, please try again")
-        
-        
 # Reads user input for the airport. Returns ICAO code of the selected airport.
 def airport_input() -> str:
     # Get all available continent from the database
@@ -130,8 +128,11 @@ def database_query(sql: str) -> list:
     cursor.close()
     return result
 
-def distance_calcs(icao1, icao2):  # returns km between two airports in kilometers (integer)
 
+def distance_calcs(icao1: str, icao2: str) -> float:
+    """
+    returns the distance between two airports in kilometers (float number)
+    """
     locations = [icao1, icao2]
     coordinates = []
 
@@ -158,10 +159,10 @@ def distance_calcs(icao1, icao2):  # returns km between two airports in kilomete
     return distance(coordinates[0], coordinates[1]).km
 
 
-# example ICAOs: EGSS, VHHH
-# print(distance_calcs("EGSS", "VHHH"))  # comment later
-
-def fetch_all_large():  # (technical function) return the list of 451 airports' ICAO-codes
+def fetch_all_large() -> list:
+    """
+    returns the list of 451 airports' ICAO-codes
+    """
     try:
         with connection.cursor() as mycursor:
             sql = """ 
@@ -179,16 +180,20 @@ def fetch_all_large():  # (technical function) return the list of 451 airports' 
         return []
 
 
-def start_locations():  # returns the list of 2 random ICAO-codes from 451 airports
-    all_locations = fetch_all_large()
+def random_location(airports) -> str:
+    """
+    returns a random ICAO code from the current list of airports, and also reduces the list by 1
+    """
+    new_icao = airports.pop(random.choice(range(len(airports))))
+    return new_icao
 
-    if len(all_locations) < 2:
-        print("Error")
-        return None
 
-    icao1 = all_locations.pop(random.choice(range(len(all_locations))))
-    icao2 = all_locations.pop(random.choice(range(len(all_locations))))
-    return [icao1, icao2]
+def flights_divisible_by_5(flights_num) -> bool:
+    """
+    checks if the number of flights is divisible by 5
+    """
+    if flights_num > 0 and flights_num % 5 == 0:
+        return True
 
 
 def register_user():
