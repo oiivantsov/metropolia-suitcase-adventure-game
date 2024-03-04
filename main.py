@@ -233,6 +233,26 @@ def register_user():
     cursor.close()
 
 
+# Prints the location of the player and the distance from the player to the target.
+# The value of the game_id parameter should be the id of the current game.
+def print_game_state(game_id: int) -> None:
+    # Get data for the player location in the current game
+    player_location = database_query(f"SELECT airport.ident, airport.name, country.name, country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country INNER JOIN game ON game.current_location = airport.ident WHERE game.id = {game_id}")
+    if len(player_location) != 1:
+        print("Error while loading your current airport data.")
+        sys.exit(1)
+
+    # Get data for the target location in the current game
+    target_location = database_query(f"SELECT airport.ident FROM airport INNER JOIN game ON airport.ident = game.target_location WHERE game.id = {game_id}")
+    if len(target_location) != 1:
+        print("Error while loading your target airport data.")
+        sys.exit(1)
+
+    # Print the current game state
+    print(f"\nYou are currently at {player_location[0][1]}, located in {player_location[0][2]} ({player_location[0][3]}).")
+    print(f"The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km.")
+
+
 # Requests game statistics from the database and prints them.
 def statistics() -> None:
     result = database_query("SELECT AVG(co2_consumed), AVG(flights_num), COUNT(*) FROM game WHERE completed = 1")
