@@ -48,6 +48,24 @@ def menu():
 
     else:
         print("The input is incorrect, please try again")
+
+def login():
+    username = input("Enter your username: ")
+    password = input("Enter your password: ")
+
+    sql = "SELECT * FROM player WHERE name=%s AND password=%s"
+    val = (username, password)
+
+    cursor = yhteys.cursor()
+    cursor.execute(sql, val)
+    result = cursor.fetchall()
+
+    if result:
+        print("Welcome to play game")
+        
+    else:
+        print("Sorry, wrong username or password. Try again.")
+
 # Reads user input for the airport. Returns ICAO code of the selected airport.
 def airport_input() -> str:
     # Get all available continent from the database
