@@ -83,7 +83,7 @@ def start_option():
 # Reads user input for the airport. Returns ICAO code of the selected airport.
 def airport_input(game_id: int) -> str:
     # Get all available continent from the database
-    continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
+    continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
     continent_options = [str(i) for i in range(1, len(continents) + 1)]
     continent_names = {"AF": "Africa", "AS": "Asia", "EU": "Europe", "NA": "North America", "OC": "Oceania", "SA": "South America"}
 
@@ -102,7 +102,7 @@ def airport_input(game_id: int) -> str:
         selected_continent = continents[int(selected_continent_number) - 1][0]
 
         # Selection of country
-        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
+        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
 
         print("\nAvailable countries in the selected continent:")
         for i in range(0, len(countries)):
@@ -121,7 +121,7 @@ def airport_input(game_id: int) -> str:
         selected_country = countries[int(selected_country_number) - 1][0]
 
         # Selection of airport
-        airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport' AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
+        airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
 
         print("\nAvailable airports in the selected country:")
         for i in range(0, len(airports)):
