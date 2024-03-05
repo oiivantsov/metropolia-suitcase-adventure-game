@@ -49,9 +49,9 @@ def menu():
     else:
         print("The input is incorrect, please try again")
 # Reads user input for the airport. Returns ICAO code of the selected airport.
-def airport_input() -> str:
+def airport_input(game_id: int) -> str:
     # Get all available continent from the database
-    continents = database_query("SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' GROUP BY country.continent")
+    continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
     continent_options = [continent[0].lower() for continent in continents]
 
     while True:
@@ -63,10 +63,10 @@ def airport_input() -> str:
 
         print("\nEnter the continent you want to fly to.\n")
 
-        selected_continent = select_option(continent_options, "Select continent: ", "The continent doesn't exist.")
+        selected_continent = select_option(continent_options, "Select continent: ", "The continent doesn't exist or can't be selected.")
 
         # Selection of country
-        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
+        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
 
         print("\nAvailable countries in the selected continent:")
         for country in countries:
@@ -77,13 +77,13 @@ def airport_input() -> str:
 
         country_options = [country[0].lower() for country in countries]
         country_options.append("0")
-        selected_country = select_option(country_options, "Select country: ", "The country doesn't exist.")
+        selected_country = select_option(country_options, "Select country: ", "The country doesn't exist or can't be selected.")
 
         if selected_country == "0":
             continue
 
         # Selection of airport
-        airports = database_query(f"SELECT ident, name FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport'")
+        airports = database_query(f"SELECT ident, name FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport' AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
 
         print("\nAvailable airports in the selected country:")
         for airport in airports:
@@ -94,7 +94,7 @@ def airport_input() -> str:
 
         airport_options = [airport[0].lower() for airport in airports]
         airport_options.append("0")
-        selected_airport = select_option(airport_options, "Select airport: ", "The airport doesn't exist.")
+        selected_airport = select_option(airport_options, "Select airport: ", "The airport doesn't exist or can't be selected.")
 
         if selected_airport == "0":
             continue
