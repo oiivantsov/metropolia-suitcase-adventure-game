@@ -81,56 +81,63 @@ def start_option():
 
 
 # Reads user input for the airport. Returns ICAO code of the selected airport.
-def airport_input() -> str:
+def airport_input(game_id: int) -> str:
     # Get all available continent from the database
-    continents = database_query("SELECT DISTINCT continent FROM country ORDER BY continent")
-    continent_options = [continent[0].lower() for continent in continents]
+    continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
+    continent_options = [str(i) for i in range(1, len(continents) + 1)]
+    continent_names = {"AF": "Africa", "AS": "Asia", "EU": "Europe", "NA": "North America", "OC": "Oceania", "SA": "South America"}
 
     while True:
 
         # Selection of continent
         print("\nAvailable continents:")
-        for continent in continents:
-            print(continent[0])
+        for i in range(0, len(continents)):
+            continent = continents[i]
+            continent_name = continent_names[continent[0]] if continent[0] in continent_names else continent[0]
+            print(f"{i + 1}: {continent_name}")
 
-        print("\nEnter the continent you want to fly to.\n")
+        print("\nEnter the continent you want to fly to. Use the number of the continent.\n")
 
-        selected_continent = select_option(continent_options, "Select continent: ", "The continent doesn't exist.")
+        selected_continent_number = select_option(continent_options, "Select continent: ", "The continent doesn't exist or can't be selected.")
+        selected_continent = continents[int(selected_continent_number) - 1][0]
 
         # Selection of country
-        countries = database_query(f"SELECT iso_country, name FROM country WHERE continent = '{selected_continent}'")
+        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
 
         print("\nAvailable countries in the selected continent:")
-        for country in countries:
-            print(f"{country[1]} (ISO code: {country[0]})")
+        for i in range(0, len(countries)):
+            country = countries[i]
+            print(f"{i + 1}: {country[1]}")
 
-        print("\nEnter the country you want to fly to. Use the ISO code of the country.")
+        print("\nEnter the country you want to fly to. Use the number of the country.")
         print("Enter 0 if you want to go back to entering continent.\n")
 
-        country_options = [country[0].lower() for country in countries]
-        country_options.append("0")
-        selected_country = select_option(country_options, "Select country: ", "The country doesn't exist.")
+        country_options = [str(i) for i in range(0, len(countries) + 1)]
+        selected_country_number = select_option(country_options, "Select country: ", "The country doesn't exist or can't be selected.")
 
-        if selected_country == "0":
+        if selected_country_number == "0":
             continue
+
+        selected_country = countries[int(selected_country_number) - 1][0]
 
         # Selection of airport
-        airports = database_query(f"SELECT ident, name FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport'")
+        airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport' AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
 
         print("\nAvailable airports in the selected country:")
-        for airport in airports:
-            print(f"{airport[1]} (ICAO code: {airport[0]})")
+        for i in range(0, len(airports)):
+            airport = airports[i]
+            print(f"{i + 1}: {airport[1]} ({airport[2]})")
 
-        print("\nEnter the airport you want to fly to. Use the ICAO code of the airport.")
+        print("\nEnter the airport you want to fly to. Use the number of the airport.")
         print("Enter 0 if you want to go back to entering continent.\n")
 
-        airport_options = [airport[0].lower() for airport in airports]
-        airport_options.append("0")
-        selected_airport = select_option(airport_options, "Select airport: ", "The airport doesn't exist.")
+        airport_options = [str(i) for i in range(0, len(airports) + 1)]
+        selected_airport_number = select_option(airport_options, "Select airport: ", "The airport doesn't exist or can't be selected.")
 
-        if selected_airport == "0":
+        if selected_airport_number == "0":
             continue
 
+        selected_airport = airports[int(selected_airport_number) - 1][0]
         return selected_airport
 
 
