@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='metro1',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -30,7 +30,7 @@ def menu():
     while True:
         choice = input("Enter your choice: ")
         if choice == "1":
-            # login()
+            login()
             break
         elif choice == "2":
             register_user()
@@ -48,21 +48,40 @@ def menu():
 
 
 def login():
-    username = input("Enter your username: ")
-    password = input("Enter your password: ")
+    while True:
+        username = input("Enter your username: ")
+        cursor = connection.cursor()
+        username_check_sql = f"SELECT * FROM player WHERE name='{username}'"
+        cursor.execute(username_check_sql)
+        username_check_result = cursor.fetchall()
+        if len(username_check_result) == 0:
+            choice = input("Sorry, wrong username! Do you want to register? (y/n)")
+            if choice == "y":
+                register_user()
+                break
+            elif choice == "n":
+                continue
+            else:
+                print("Sorry, wrong choice. Enter correct username.")
+                continue
 
-    sql = "SELECT * FROM player WHERE name=%s AND password=%s"
-    val = (username, password)
 
-    cursor = connection.cursor()
-    cursor.execute(sql, val)
-    result = cursor.fetchall()
+        password = input("Enter your password: ")
 
-    if result:
-        print("Welcome to play game")
-        
-    else:
-        print("Sorry, wrong username or password. Try again.")
+        sql = "SELECT * FROM player WHERE name=%s AND password=%s"
+        val = (username, password)
+
+        cursor.execute(sql, val)
+        result = cursor.fetchall()
+
+        if result:
+            print(f"Hello {username}! You have successfully logged in!")
+            #start_option()
+            break
+
+        else:
+            print("Sorry, wrong username or password. Try again.")
+
 
 def start_option():
     print("1. Start the game")
