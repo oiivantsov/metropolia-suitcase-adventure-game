@@ -342,7 +342,7 @@ def game():
     cursor.execute(insert_query, (game_id, current_location, target_location, flights_num))
     while (True):
         print_game_state(game_id)
-        current_location = airport_input()
+        current_location = airport_input(game_id)
         flights_num += 1
         update_query = "UPDATE game SET current_location = %s, target_location = %s WHERE id = %s;"
         cursor.execute(update_query, (current_location, target_location, game_id))
