@@ -87,12 +87,12 @@ def airport_input(game_id: int) -> str:
         selected_country = countries[int(selected_country_number) - 1][0]
 
         # Selection of airport
-        airports = database_query(f"SELECT ident, name FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport' AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
+        airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport' AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
 
         print("\nAvailable airports in the selected country:")
         for i in range(0, len(airports)):
             airport = airports[i]
-            print(f"{i + 1}: {airport[1]}")
+            print(f"{i + 1}: {airport[1]} ({airport[2]})")
 
         print("\nEnter the airport you want to fly to. Use the number of the airport.")
         print("Enter 0 if you want to go back to entering continent.\n")
