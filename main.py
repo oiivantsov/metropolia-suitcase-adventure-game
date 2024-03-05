@@ -3,6 +3,7 @@ import sys
 from geopy.distance import distance
 import banner
 import random
+from colorama import Fore, Back, Style
 
 try:
     connection = mysql.connector.connect(
@@ -10,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='MetroSuomi2024',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -18,36 +19,33 @@ except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
-banner.printBanner()  # to print banner (code is in the file "banner")
-
-# pause
-input("\033[32mPress [Enter] to continue...\033[0m")
 
 def menu():
+    print("Please select a number from 1 to 4 to make your choice.")
     print("1. Login")
     print("2. Registration")
     print("3. Exit")
     print("4. Statistics")
 
-    choice = int(input("Enter your choice: "))
+    while True:
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            # login()
+            break
+        elif choice == "2":
+            register_user()
+            break
+        elif choice == "3":
+            print("You've chosen to exit the game. We hope to see you again soon!")
+            sys.exit(1)
+        elif choice == "4":
+            statistics()
+            input("Press [ENTER] to continue...")
+            menu()
+        else:
+            print(f"Incorrect! Select the number from 1 to 4, please try again!")
+            continue
 
-    if choice == 1:
-        # login()
-        pass
-
-    elif choice == 2:
-        # register()
-        pass
-
-    elif choice == 3:
-        exit()
-
-    elif choice == 4:
-        # statistics()
-        pass
-
-    else:
-        print("The input is incorrect, please try again")
 
 def login():
     username = input("Enter your username: ")
@@ -78,8 +76,6 @@ def start_option():
         #continue_game()
     else:
         print("invalid choice")
-
-
 
 
 # Reads user input for the airport. Returns ICAO code of the selected airport.
@@ -222,30 +218,31 @@ def random_location(airports) -> str:
     return new_icao
 
 
-def flights_divisible_by_5(flights_num) -> bool:
-    """
-    checks if the number of flights is divisible by 5
-    """
+def flights_divisible_by_5(flights_num) -> bool:     # checks if the number of flights is divisible by 5
     if flights_num > 0 and flights_num % 5 == 0:
         return True
 
 
 def register_user():
-    user_name = input("Enter your name: ")
-    # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
-    while len(user_name) < 4 or len(user_name) > 20:      # changed 6 to 4 minimum because 6 is too long
-        print("Username must be between 4 and 20 characters long.")
-        user_name = input("Enter your name: ")
+    print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " NEW USER REGISTRATION " + Style.RESET_ALL)
 
-    # Check if the username already exists in the database
-    cursor = connection.cursor()
-    select_name_query = f"""SELECT name FROM player WHERE name = "{user_name}";"""
-    cursor.execute(select_name_query)
-    existing_user = cursor.fetchone()
-    if existing_user:
-        print("Username already exists. Please choose another username.")
-        register_user()  # Restart the registration process
-        return
+    while True:
+        user_name = input("Enter your name: ")
+        # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
+        if len(user_name) < 4 or len(user_name) > 20: # changed 6 to 4 minimum because 6 is too long
+            print("Username must be between 4 and 20 characters long.")
+            continue
+
+        # Check if the username already exists in the database
+        cursor = connection.cursor()
+        select_name_query = f"""SELECT name FROM player WHERE name = "{user_name}";"""
+        cursor.execute(select_name_query)
+        existing_user = cursor.fetchone()
+        if existing_user:
+            print(f"Username \"{user_name}\" already exists. Please choose another username.")
+            continue  # Restart the registration process
+        else:
+            break
 
     password = input("Enter your password: ")
     # Check if password length is less than 4, prompt until valid input is provided
@@ -254,6 +251,7 @@ def register_user():
         password = input("Enter your password: ")
 
     # Find the maximum id value currently in use
+    cursor = connection.cursor()
     cursor.execute("SELECT MAX(id) FROM player")
     max_id_result = cursor.fetchone()
     max_id = max_id_result[0] if max_id_result[0] is not None else 0
@@ -263,7 +261,7 @@ def register_user():
     # Insert the airport into the MySQL database
     insert_query = "INSERT INTO player (id, name, password) VALUES (%s, %s, %s)"
     cursor.execute(insert_query, (new_id, user_name, password))
-    print(f"User {user_name} successfully registered.")
+    print(f"User {user_name} successfully registered (your password is: {password}).")
     cursor.close()
 
 
@@ -283,8 +281,8 @@ def print_game_state(game_id: int) -> None:
         sys.exit(1)
 
     # Print the current game state
-    print(f"\nYou are currently at {player_location[0][1]}, located in {player_location[0][2]} ({player_location[0][3]}).")
-    print(f"The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km.")
+    print("\n" + Back.WHITE + Fore.LIGHTWHITE_EX + f"You are currently at {player_location[0][1]}, located in {player_location[0][2]} ({player_location[0][3]})." + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + f"The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km." + Style.RESET_ALL)
 
 
 # Requests game statistics from the database and prints them.
@@ -299,4 +297,39 @@ def statistics() -> None:
     print(f"\nStatistics for all {game_count} completed games:")
     print(f"Average co2 consumption: {co2_average:.1f}")
     print(f"Average flight amount: {flights_average:.1f}\n")
-    cursor.close()
+
+
+def game():
+    print("Explaining how to play...")  # rules will be here
+    cursor = connection.cursor()
+    # Find the maximum id value currently in use
+    cursor.execute("SELECT MAX(id) FROM game")
+    max_id_result = cursor.fetchone()
+    max_id = max_id_result[0] if max_id_result[0] is not None else 0
+    game_id = max_id + 1                          # create id for the game
+
+    airports = fetch_all_large()                  # get list of the airports
+    current_location = random_location(airports)  # get start/current location
+    target_location = random_location(airports)   # get goal location
+    flights_num = 0                               # set flights_num as 0 at the beginning
+    insert_query = "INSERT INTO game (id, current_location, target_location, flights_num) VALUES (%s, %s, %s, %s)"
+    cursor.execute(insert_query, (game_id, current_location, target_location, flights_num))
+    while (True):
+        print_game_state(game_id)
+        current_location = airport_input()
+        flights_num += 1
+        update_query = "UPDATE game SET current_location = %s, target_location = %s WHERE id = %s;"
+        cursor.execute(update_query, (current_location, target_location, game_id))
+        if current_location == target_location:
+            print("You won!")
+            break
+        #if flights_divisible_by_5(flights_num):
+            #goal_location = random_location(airports)
+
+
+def main_game():    # main game flow
+    #banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
+    #menu()
+    game()
+
+main_game()
