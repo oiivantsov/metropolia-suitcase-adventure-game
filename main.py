@@ -288,7 +288,7 @@ def register_user():
 # The value of the game_id parameter should be the id of the current game.
 def print_game_state(game_id: int) -> None:
     # Get data for the player location in the current game
-    player_location = database_query(f"SELECT airport.ident, airport.name, country.name, country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country INNER JOIN game ON game.current_location = airport.ident WHERE game.id = {game_id}")
+    player_location = database_query(f"SELECT airport.ident, airport.name, country.name, country.continent, airport.municipality FROM airport INNER JOIN country ON airport.iso_country = country.iso_country INNER JOIN game ON game.current_location = airport.ident WHERE game.id = {game_id}")
     if len(player_location) != 1:
         print("Error while loading your current airport data.")
         sys.exit(1)
@@ -300,7 +300,7 @@ def print_game_state(game_id: int) -> None:
         sys.exit(1)
 
     # Print the current game state
-    print("\n" + Back.WHITE + Fore.LIGHTWHITE_EX + f"You are currently at {player_location[0][1]}, located in {player_location[0][2]} ({player_location[0][3]})." + Style.RESET_ALL)
+    print("\n" + Back.WHITE + Fore.LIGHTWHITE_EX + f"You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]})." + Style.RESET_ALL)
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f"The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km." + Style.RESET_ALL)
 
 
