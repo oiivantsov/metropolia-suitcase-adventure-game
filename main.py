@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='MetroSuomi2024',  # change it to your password
+        password='metro0',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -54,7 +54,7 @@ def login():
     sql = "SELECT * FROM player WHERE name=%s AND password=%s"
     val = (username, password)
 
-    cursor = yhteys.cursor()
+    cursor = connection.cursor()
     cursor.execute(sql, val)
     result = cursor.fetchall()
 
@@ -71,8 +71,10 @@ def start_option():
     choice = int(input("Enter your choice: "))
 
     if choice == 1:
+        pass
         #new_game()
     elif choice == 2:
+        pass
         #continue_game()
     else:
         print("invalid choice")
@@ -210,7 +212,7 @@ def fetch_all_large() -> list:
         return []
 
 
-def random_location(airports) -> str:
+def random_location(airports: list) -> str:
     """
     returns a random ICAO code from the current list of airports, and also reduces the list by 1
     """
@@ -218,9 +220,26 @@ def random_location(airports) -> str:
     return new_icao
 
 
-def flights_divisible_by_5(flights_num) -> bool:     # checks if the number of flights is divisible by 5
+def flights_divisible_by_5(flights_num: int) -> bool:     # checks if the number of flights is divisible by 5
     if flights_num > 0 and flights_num % 5 == 0:
         return True
+
+
+def emission_calcs(distance_in_km: float) -> float:
+    """
+    :param distance_in_km:
+    :return: CO2 emissions in kg (float)
+    Calculate after each flight \n
+    source1: https://ourworldindata.org/travel-carbon-footprint \n
+    source2: https://www.statista.com/statistics/1185559/carbon-footprint-of-travel-per-kilometer-by-mode-of-transport/ \n
+    source3: https://dbpedia.org/page/Flight_length
+    """
+    if distance_in_km < 1100:
+        return distance_in_km * 0.245
+    elif 1100 <= distance_in_km < 2000:
+        return distance_in_km * 0.151
+    else:
+        return distance_in_km * 0.148
 
 
 def register_user():
