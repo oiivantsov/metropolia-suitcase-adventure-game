@@ -250,8 +250,8 @@ def print_game_state(game_id: int) -> None:
         sys.exit(1)
 
     # Print the current game state
-    print(f"\nYou are currently at {player_location[0][1]}, located in {player_location[0][2]} ({player_location[0][3]}).")
-    print(f"The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km.")
+    print("\n" + Back.WHITE + Fore.LIGHTWHITE_EX + f"You are currently at {player_location[0][1]}, located in {player_location[0][2]} ({player_location[0][3]})." + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + f"The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km." + Style.RESET_ALL)
 
 
 # Requests game statistics from the database and prints them.
@@ -279,7 +279,7 @@ def game():
 
     airports = fetch_all_large()                  # get list of the airports
     current_location = random_location(airports)  # get start/current location
-    target_location = random_location(airports)     # get goal location
+    target_location = random_location(airports)   # get goal location
     flights_num = 0                               # set flights_num as 0 at the beginning
     insert_query = "INSERT INTO game (id, current_location, target_location, flights_num) VALUES (%s, %s, %s, %s)"
     cursor.execute(insert_query, (game_id, current_location, target_location, flights_num))
@@ -290,6 +290,7 @@ def game():
         update_query = "UPDATE game SET current_location = %s, target_location = %s WHERE id = %s;"
         cursor.execute(update_query, (current_location, target_location, game_id))
         if current_location == target_location:
+            print("You won!")
             break
         #if flights_divisible_by_5(flights_num):
             #goal_location = random_location(airports)
