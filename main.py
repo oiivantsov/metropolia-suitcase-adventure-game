@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='MetroSuomi2024',  # change it to your password
+        password='metro1',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -367,7 +367,7 @@ def game():
 
 def main_game():    # main game flow
     #banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
-    menu()
+    #menu()
     game()
 
 main_game()
