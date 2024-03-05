@@ -53,6 +53,7 @@ def airport_input(game_id: int) -> str:
     # Get all available continent from the database
     continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
     continent_options = [str(i) for i in range(1, len(continents) + 1)]
+    continent_names = {"AF": "Africa", "AS": "Asia", "EU": "Europe", "NA": "North America", "OC": "Oceania", "SA": "South America"}
 
     while True:
 
@@ -60,7 +61,8 @@ def airport_input(game_id: int) -> str:
         print("\nAvailable continents:")
         for i in range(0, len(continents)):
             continent = continents[i]
-            print(f"{i + 1}: {continent[0]}")
+            continent_name = continent_names[continent[0]] if continent[0] in continent_names else continent[0]
+            print(f"{i + 1}: {continent_name}")
 
         print("\nEnter the continent you want to fly to. Use the number of the continent.\n")
 
