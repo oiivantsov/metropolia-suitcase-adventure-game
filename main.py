@@ -19,6 +19,7 @@ except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
+FROM_EACH_CONTINENT = 5  # max 17 as just 17 airports in OC continent
 
 def menu():
     print(Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
@@ -157,7 +158,7 @@ def statistics() -> None:        # Requests game statistics from the database an
 # Reads user input for the airport. Returns ICAO code of the selected airport.
 def airport_input(game_id: int) -> str:
     # Get all available continent from the database
-    continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
+    continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
     continent_options = [str(i) for i in range(1, len(continents) + 1)]
     continent_names = {"AF": "Africa", "AS": "Asia", "EU": "Europe", "NA": "North America", "OC": "Oceania", "SA": "South America"}
 
@@ -177,7 +178,7 @@ def airport_input(game_id: int) -> str:
         selected_continent = continents[int(selected_continent_number) - 1][0]
 
         # Selection of country
-        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.type = 'large_airport' AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
+        countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
 
         print("\nAvailable countries in the selected continent:")
         for i in range(0, len(countries)):
@@ -197,7 +198,7 @@ def airport_input(game_id: int) -> str:
         selected_country = countries[int(selected_country_number) - 1][0]
 
         # Selection of airport
-        airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND type = 'large_airport' AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
+        airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
 
         print("\nAvailable airports in the selected country:")
         for i in range(0, len(airports)):
@@ -276,33 +277,37 @@ def distance_calcs(icao1: str, icao2: str) -> float:
     return distance(coordinates[0], coordinates[1]).km
 
 
-def fetch_all_large() -> list:
+def fetch_random_large() -> list:
     """
-    returns the list of 451 airports' ICAO-codes
+    returns the list of airports, 5 from each continent' ICAO-codes
     """
+    continents = ["AF", "AS", "EU", "NA", "OC", "SA"]
+
     try:
-        with connection.cursor() as mycursor:
-            sql = """ 
-            SELECT ident FROM airport
-            WHERE airport.type = "large_airport";
-            """
+        available_airports = []
+        for _ in continents:
+            with connection.cursor() as mycursor:
+                sql = f""" 
+                SELECT airport.ident FROM airport
+                LEFT JOIN country
+                ON airport.iso_country = country.iso_country
+                WHERE airport.type = "large_airport"
+                AND country.continent = "{_}";
+                """
 
-            mycursor.execute(sql)
-            myresult = mycursor.fetchall()
+                mycursor.execute(sql)
+                myresult = mycursor.fetchall()
 
-            return [i[0] for i in myresult]
+                larges_from_continent = [i[0] for i in myresult]
+                random.shuffle(larges_from_continent) # to random
+                available_airports.extend(larges_from_continent[:FROM_EACH_CONTINENT])
+
+        random.shuffle(available_airports)
+        return available_airports
 
     except mysql.connector.Error as err:
         print("Something went wrong: {}".format(err))
         return []
-
-
-def random_location(airports: list) -> str:
-    """
-    returns a random ICAO code from the current list of airports, and also reduces the list by 1
-    """
-    new_icao = airports.pop(random.choice(range(len(airports))))
-    return new_icao
 
 
 def flights_divisible_by_5(flights_num: int) -> bool:     # checks if the number of flights is divisible by 5
@@ -356,21 +361,51 @@ def game():
     max_id = max_id_result[0] if max_id_result[0] is not None else 0
     game_id = max_id + 1                          # create id for the game
 
-    airports = fetch_all_large()                  # get list of the airports
-    current_location = random_location(airports)  # get start/current location
-    target_location = random_location(airports)   # get goal location
+    airports = fetch_random_large()                  # get list of the airports
+
+    current_location = random.choice(airports)  # get start/current location
+    target_location = random.choice(airports)   # get goal location
+    while current_location == target_location:  # check that target and player are not in the same location
+        target_location = random.choice(airports)
+
+    distance = distance_calcs(current_location, target_location)
     flights_num = 0                               # set flights_num as 0 at the beginning
-    insert_query = "INSERT INTO game (id, current_location, target_location, flights_num) VALUES (%s, %s, %s, %s)"
-    cursor.execute(insert_query, (game_id, current_location, target_location, flights_num))
+    emissions = 0                               # set emissions as 0 at the beginning
+
+    insert_query = """
+    INSERT INTO game (id, current_location, target_location, co2_consumed, flights_num, distance_to_target) 
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(insert_query, (game_id, current_location, target_location, emissions, flights_num, distance))
+
+    for icao in airports:
+        insert_query = """
+        INSERT INTO available_airport (game_id, airport_ident) 
+        VALUES (%s, %s)
+        """
+        cursor.execute(insert_query, (game_id, icao))
+    
     print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME START " + Style.RESET_ALL)
-    while (True):
+    
+    while True:
         print_game_state(game_id)
         current_location = airport_input(game_id)
-        flights_num += 1
-        update_query = "UPDATE game SET current_location = %s, target_location = %s WHERE id = %s;"
-        cursor.execute(update_query, (current_location, target_location, game_id))
+
+        distance = distance_calcs(current_location, target_location)
+        emissions = emission_calcs(distance)
+
+        update_query = """
+        UPDATE game 
+        SET current_location = %s, target_location = %s, co2_consumed = co2_consumed + %s, flights_num = flights_num + %s, distance_to_target = %s 
+        WHERE id = %s;"""
+        cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
+
         if current_location == target_location:
             print("You won!")
+            update_query = """
+            UPDATE game SET completed = %s WHERE id = %s;
+            """
+            cursor.execute(update_query, (1, game_id))
             break
         #if flights_divisible_by_5(flights_num):
             #goal_location = random_location(airports)
