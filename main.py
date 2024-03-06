@@ -21,6 +21,7 @@ except mysql.connector.Error as error:
 
 
 def menu():
+    print(Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
     print("Please select a number from 1 to 4 to make your choice.")
     print("1. Login")
     print("2. Registration")
@@ -75,7 +76,7 @@ def login():      # login user
         result = cursor.fetchall()
 
         if result:
-            print(Fore.LIGHTGREEN_EX + f"User {username} successfully logged in!" + Style.RESET_ALL)
+            print(Fore.LIGHTGREEN_EX + f"User {username} successfully logged in!" + Style.RESET_ALL + "\n")
             break
 
         else:
@@ -127,7 +128,7 @@ def register_user():     # register new user
 def statistics() -> None:        # Requests game statistics from the database and prints them.
     result = database_query("SELECT AVG(co2_consumed), AVG(flights_num), COUNT(*) FROM game WHERE completed = 1")
     co2_average, flights_average, game_count = result[0]
-
+    print(Back.LIGHTGREEN_EX + Fore.BLACK + "STATISTICS" + Style.RESET_ALL)
     if game_count == 0 or co2_average is None or flights_average is None:
         print("\nNo statistics available.\n")
         return
@@ -210,6 +211,7 @@ def airport_input(game_id: int) -> str:
         airport_options = [str(i) for i in range(0, len(airports) + 1)]
         selected_airport_number = select_option(airport_options, "Select airport: ", "The airport doesn't exist or can't be selected.")
 
+        print("")
         if selected_airport_number == "0":
             continue
 
@@ -341,7 +343,7 @@ def print_game_state(game_id: int) -> None:
         sys.exit(1)
 
     # Print the current game state
-    print("\n" + Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f" The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km. " + Style.RESET_ALL)
 
 
@@ -360,6 +362,7 @@ def game():
     flights_num = 0                               # set flights_num as 0 at the beginning
     insert_query = "INSERT INTO game (id, current_location, target_location, flights_num) VALUES (%s, %s, %s, %s)"
     cursor.execute(insert_query, (game_id, current_location, target_location, flights_num))
+    print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME START " + Style.RESET_ALL)
     while (True):
         print_game_state(game_id)
         current_location = airport_input(game_id)
@@ -374,7 +377,7 @@ def game():
 
 
 def main_game():    # main game flow
-    #banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
+    banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
     #menu()
     game()
 
