@@ -368,14 +368,13 @@ def game():
         current_location = airport_input(game_id)
 
         distance = distance_calcs(current_location, target_location)
-        flights_num += 1
-        emissions += emission_calcs(distance)
+        emissions = emission_calcs(distance)
 
         update_query = """
         UPDATE game 
-        SET current_location = %s, target_location = %s, co2_consumed = %s, flights_num = %s, distance_to_target = %s 
+        SET current_location = %s, target_location = %s, co2_consumed = co2_consumed + %s, flights_num = flights_num + %s, distance_to_target = %s 
         WHERE id = %s;"""
-        cursor.execute(update_query, (current_location, target_location, emissions, flights_num, distance, game_id))
+        cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
 
         if current_location == target_location:
             print("You won!")
