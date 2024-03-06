@@ -352,9 +352,11 @@ def print_game_state(game_id: int) -> None:
     print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL)
 
 
-def game():
-    #print("Explaining how to play...")  # rules will be here
+# Creates a new game for a player.
+# Returns the id of the created game.
+def create_game(player_id: int) -> int:
     cursor = connection.cursor()
+
     # Find the maximum id value currently in use
     cursor.execute("SELECT MAX(id) FROM game")
     max_id_result = cursor.fetchone()
@@ -373,10 +375,10 @@ def game():
     emissions = 0                               # set emissions as 0 at the beginning
 
     insert_query = """
-    INSERT INTO game (id, current_location, target_location, co2_consumed, flights_num, distance_to_target) 
-    VALUES (%s, %s, %s, %s, %s, %s)
+    INSERT INTO game (id, player_id, current_location, target_location, co2_consumed, flights_num, distance_to_target) 
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
     """
-    cursor.execute(insert_query, (game_id, current_location, target_location, emissions, flights_num, distance))
+    cursor.execute(insert_query, (game_id, player_id, current_location, target_location, emissions, flights_num, distance))
 
     for icao in airports:
         insert_query = """
@@ -384,9 +386,28 @@ def game():
         VALUES (%s, %s)
         """
         cursor.execute(insert_query, (game_id, icao))
-    
+
+    cursor.close()
+
+    return game_id
+
+
+def game(game_id: int) -> None:
+    cursor = connection.cursor()
+
+    # Get the target location from the database
+    cursor.execute(f"SELECT target_location FROM game WHERE id = {game_id}")
+    target_location_result = cursor.fetchall()
+
+    if len(target_location_result) != 1:
+        print("Error while loading your target airport data.")
+        sys.exit(1)
+
+    target_location = target_location_result[0][0]
+
     print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME START " + Style.RESET_ALL)
-    
+
+    # Game loop
     while True:
         print_game_state(game_id)
         current_location = airport_input(game_id)
@@ -410,11 +431,14 @@ def game():
         #if flights_divisible_by_5(flights_num):
             #goal_location = random_location(airports)
 
+    cursor.close()
+
 
 def main_game():    # main game flow
     banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
     #menu()
-    game()
+    database_query("INSERT IGNORE INTO player VALUES (1, 'Test User', '1')") # Delete this row later. This row makes sure that there is a user with id 1 in the database so that the game is currently playable.
+    game(create_game(1))
 
 
 main_game()
