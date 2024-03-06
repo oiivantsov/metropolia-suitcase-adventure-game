@@ -349,7 +349,7 @@ def print_game_state(game_id: int) -> None:
 
     # Print the current game state
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
-    print(Back.WHITE + Fore.LIGHTWHITE_EX + f" The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km. " + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL)
 
 
 def game():
