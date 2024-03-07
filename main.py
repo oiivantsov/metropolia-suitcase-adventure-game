@@ -32,11 +32,11 @@ def menu():
     while True:
         choice = input("Enter your choice: ")
         if choice == "1":
-            login()
-            break
+            user_id = login()
+            return user_id
         elif choice == "2":
-            register_user()
-            break
+            user_id = register_user()
+            return user_id
         elif choice == "3":
             print("You've chosen to exit the game. We hope to see you again soon!")
             sys.exit(1)
@@ -49,7 +49,7 @@ def menu():
             continue
 
 
-def login():      # login user
+def login() -> int:      # login user
     print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " LOGIN USER " + Style.RESET_ALL)
     while True:
         username = input("Enter your username: ")
@@ -78,13 +78,14 @@ def login():      # login user
 
         if result:
             print(Fore.LIGHTGREEN_EX + f"User {username} successfully logged in!" + Style.RESET_ALL + "\n")
-            break
+            user_id = result[0][0]
+            return user_id
 
         else:
             print(Fore.LIGHTRED_EX + "Sorry, wrong username or password. Try again." + Style.RESET_ALL)
 
 
-def register_user():     # register new user
+def register_user() -> int:     # register new user
     print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " NEW USER REGISTRATION " + Style.RESET_ALL)
 
     while True:
@@ -122,8 +123,9 @@ def register_user():     # register new user
     # Insert the airport into the MySQL database
     insert_query = "INSERT INTO player (id, name, password) VALUES (%s, %s, %s)"
     cursor.execute(insert_query, (new_id, user_name, password))
-    print(Fore.LIGHTYELLOW_EX + f"User {user_name} successfully registered (your password is: {password})." + Style.RESET_ALL)
+    print(Fore.LIGHTGREEN_EX + f"User {user_name} successfully registered (your password is: {password})." + Style.RESET_ALL + "\n")
     cursor.close()
+    return new_id
 
 
 def statistics() -> None:        # Requests game statistics from the database and prints them.
@@ -349,7 +351,7 @@ def print_game_state(game_id: int) -> None:
 
     # Print the current game state
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
-    print(Back.WHITE + Fore.LIGHTWHITE_EX + f" The distance to your owner is {distance_calcs(player_location[0][0], target_location[0][0]):.0f} km. " + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL)
 
 
 # Creates a new game for a player.
@@ -436,9 +438,8 @@ def game(game_id: int) -> None:
 
 def main_game():    # main game flow
     banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
-    #menu()
-    database_query("INSERT IGNORE INTO player VALUES (1, 'Test User', '1')") # Delete this row later. This row makes sure that there is a user with id 1 in the database so that the game is currently playable.
-    game(create_game(1))
+    user_id = menu()
+    game(create_game(user_id))
 
 
 main_game()
