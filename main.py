@@ -97,8 +97,8 @@ def register_user() -> int:
     while True:
         user_name = input("Enter your name: ")
         # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
-        if len(user_name) < 4 or len(user_name) > 20: # changed 6 to 4 minimum because 6 is too long
-            print(Fore.LIGHTRED_EX + "Username must be between 4 and 20 characters long." + Style.RESET_ALL)
+        if len(user_name) < 3 or len(user_name) > 20: # changed 6 to 4 minimum because 6 is too long
+            print(Fore.LIGHTRED_EX + "Username must be between 3 and 20 characters long." + Style.RESET_ALL)
             continue
 
         # Check if the username already exists in the database
