@@ -366,10 +366,10 @@ def start_game(player_id: int) -> None:
     # If the player has an unfinished game (or games), ask if the player wants to continue it or start a new game and delete the previous game
     if len(result) > 0:
         print("You have currently an unfinished game. You can continue it or start a new one. Starting a new game will delete the previous one.")
-        selected_option = input("Do you want to continue the previous game (y/n)?: ").lower()
+        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", "Invalid input!")
         print()
 
-        if selected_option.startswith("y"):
+        if selected_option == "y":
             game(result[0][0])  # Continue the unfinished game
             return
 
