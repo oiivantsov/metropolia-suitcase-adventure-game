@@ -41,8 +41,8 @@ def menu() -> int:
                 return user_id
         elif choice == "3":
             statistics()
-            input("Press [ENTER] to continue...")
-            continue  # fixed because recursion didn't work right
+            print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+            continue
         elif choice == "4":
             print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
             sys.exit(1)
@@ -158,14 +158,16 @@ def statistics() -> None:
     """
     result = database_query("SELECT AVG(co2_consumed), AVG(flights_num), COUNT(*) FROM game WHERE completed = 1")
     co2_average, flights_average, game_count = result[0]
-    print(Back.LIGHTGREEN_EX + Fore.BLACK + "STATISTICS" + Style.RESET_ALL)
+    print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " STATISTICS " + Style.RESET_ALL)
     if game_count == 0 or co2_average is None or flights_average is None:
         print("\nNo statistics available.\n")
         return
 
-    print(f"\nStatistics for all {game_count} completed games:")
+    print(f"Statistics for all {game_count} completed games:")
     print(f"Average co2 consumption: {co2_average:.1f}")
     print(f"Average flight amount: {flights_average:.1f}\n")
+
+    input("Press [ENTER] to continue...")
 
 
 def airport_input(game_id: int) -> str:
