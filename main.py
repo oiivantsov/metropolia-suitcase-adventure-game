@@ -433,6 +433,7 @@ def game(game_id: int) -> None:
             UPDATE game SET completed = %s WHERE id = %s;
             """
             cursor.execute(update_query, (1, game_id))
+            cursor.execute(f"DELETE FROM available_airport WHERE game_id = {game_id}")
             game_win = True
 
     cursor.close()
