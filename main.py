@@ -4,7 +4,10 @@ from geopy.distance import distance
 import banner
 import random
 from colorama import Fore, Back, Style
-from pygame import mixer
+
+import contextlib
+with contextlib.redirect_stdout(None):
+    from pygame import mixer
 
 try:
     connection = mysql.connector.connect(
