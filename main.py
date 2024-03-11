@@ -374,6 +374,34 @@ def print_game_state(game_id: int) -> None:
     print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL + "\n")
 
 
+def start_game(player_id: int) -> None:
+    """
+    Starts a new game or continues a previous unfinished game of the player.
+    If the player doesn't have any unfinished games, the function creates a new game.
+    If the player has an unfinished game (or games), the function asks if player wants to continue the game or start a new one.
+    :param player_id:
+    """
+
+    # Get all previous unfinished games of the player
+    result = database_query(f"SELECT id FROM game WHERE player_id = {player_id} AND completed = 0")
+
+    # If the player has an unfinished game (or games), ask if the player wants to continue it or start a new game and delete the previous game
+    if len(result) > 0:
+        print("You have currently an unfinished game. You can continue it or start a new one. Starting a new game will delete the previous one.")
+        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", "Invalid input!")
+        print()
+
+        if selected_option == "y":
+            game(result[0][0])  # Continue the unfinished game
+            return
+
+        # Delete all unfinished games of the player
+        database_query(f"DELETE FROM available_airport WHERE game_id IN (SELECT id FROM game WHERE player_id = {player_id} AND completed = 0)")
+        database_query(f"DELETE FROM game WHERE player_id = {player_id} AND completed = 0")
+
+    game(create_game(player_id))  # Create a new game and start it
+
+
 def create_game(player_id: int) -> int:
     """
     Creates a new game for a player.
@@ -474,7 +502,7 @@ def main_game() -> None:
         # play-again loop
         play_again = ""
         while play_again != "n":
-            game(create_game(user_id))
+            start_game(user_id)
             play_again = input("Do you want to play again (y/n)?: ").lower()
             print("")
 
