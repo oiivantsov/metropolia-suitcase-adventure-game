@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='MetroSuomi2024',  # change it to your password
+        password='metro0',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -163,11 +163,15 @@ def statistics() -> None:
         print("\nNo statistics available.\n")
         return
 
-    print(f"Statistics for all {game_count} completed games:")
-    print(f"Average co2 consumption: {co2_average:.1f}")
-    print(f"Average flight amount: {flights_average:.1f}\n")
+    print(f"Statistics for all \033[92m{game_count}\033[0m completed games:")  # green color
+    line = "|---------------------------------|"
+    print(line)
+    print(f" Average co2 consumption | \033[92m{co2_average:.1f}\033[0m")  # color and tab to see better
+    print(" " + line[1:-1])
+    print(f" Average flight amount   | \033[92m{flights_average:.1f}\033[0m") # color and tab to see better
+    print(line)
 
-    input("Press [ENTER] to continue...")
+    input("Press \033[96m[ENTER]\033[0m to continue...\n")  # cian color
 
 
 def airport_input(game_id: int) -> str:
@@ -192,6 +196,10 @@ def airport_input(game_id: int) -> str:
         print("")
 
         selected_continent_number = select_option(continent_options, "Select continent: ", "The continent doesn't exist or can't be selected.")
+
+        if selected_continent_number == "menu":
+            return "back_to_menu"
+
         selected_continent = continents[int(selected_continent_number) - 1][0]
 
         # Selection of country
@@ -212,6 +220,9 @@ def airport_input(game_id: int) -> str:
         if selected_country_number == "0":
             print("")
             continue
+
+        elif selected_country_number == "menu":
+            return "back_to_menu"
 
         selected_country = countries[int(selected_country_number) - 1][0]
 
@@ -235,6 +246,9 @@ def airport_input(game_id: int) -> str:
             print("")
             continue
 
+        elif selected_airport_number == "menu":
+            return "back_to_menu"
+
         selected_airport = airports[int(selected_airport_number) - 1][0]
         return selected_airport
 
@@ -245,6 +259,7 @@ def select_option(options: list, input_message: str, error_message: str) -> str:
     If the input in lower case is not in the options list, the function reads input again and displays the error message.
     Returns the input when it is in the options list.
     """
+    options.append("menu")  # always an option to write "menu"
     while True:
         selected_country = input(input_message)
         if selected_country.lower() in options:
@@ -374,7 +389,7 @@ def print_game_state(game_id: int) -> None:
     print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL + "\n")
 
 
-def start_game(player_id: int) -> None:
+def start_game(player_id: int) -> bool:
     """
     Starts a new game or continues a previous unfinished game of the player.
     If the player doesn't have any unfinished games, the function creates a new game.
@@ -392,14 +407,13 @@ def start_game(player_id: int) -> None:
         print()
 
         if selected_option == "y":
-            game(result[0][0])  # Continue the unfinished game
-            return
+            return game(result[0][0])  # Continue the unfinished game and return False or True
 
         # Delete all unfinished games of the player
         database_query(f"DELETE FROM available_airport WHERE game_id IN (SELECT id FROM game WHERE player_id = {player_id} AND completed = 0)")
         database_query(f"DELETE FROM game WHERE player_id = {player_id} AND completed = 0")
 
-    game(create_game(player_id))  # Create a new game and start it
+    return game(create_game(player_id))  # Create a new game and start it, and return False or True
 
 
 def create_game(player_id: int) -> int:
@@ -446,8 +460,7 @@ def create_game(player_id: int) -> int:
     return game_id
 
 
-def game(game_id: int) -> None:
-    game_win = False
+def game(game_id: int) -> bool:
     cursor = connection.cursor()
 
     # Get the target location and distance to it from the database
@@ -464,10 +477,15 @@ def game(game_id: int) -> None:
     print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME START " + Style.RESET_ALL)
 
     # Game loop
-    while not game_win:
+    while True:
         print_game_state(game_id)
         emissions = emission_calcs(distance)
+
         current_location = airport_input(game_id)
+        if current_location == "back_to_menu":
+            print("\033[94mYour progress is saved! Back to main menu ...\033[0m")  # green color: \033[94m, end-color: \033[0m
+            input("Press \033[96m[ENTER]\033[0m to continue...\n")  # cian color: \033[96m
+            return False
 
         distance = distance_calcs(current_location, target_location)
 
@@ -484,9 +502,8 @@ def game(game_id: int) -> None:
             """
             cursor.execute(update_query, (1, game_id))
             cursor.execute(f"DELETE FROM available_airport WHERE game_id = {game_id}")
-            game_win = True
-
-    cursor.close()
+            cursor.close()
+            return True
 
 
 def main_game() -> None:
@@ -495,14 +512,13 @@ def main_game() -> None:
     """
     banner.printBanner()
 
-    # menu loop (ends only if user press 3 ("exit") in menu)
+    # menu loop (ends only if user press "exit"-option in menu)
     while True:
         user_id = menu()
 
         # play-again loop
         play_again = ""
-        while play_again != "n":
-            start_game(user_id)
+        while play_again != "n" and start_game(user_id):
             play_again = input("Do you want to play again (y/n)?: ").lower()
             print("")
 
