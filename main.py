@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='MetroSuomi2024',  # change it to your password
+        password='metro0',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -21,29 +21,30 @@ except mysql.connector.Error as error:
 
 
 def menu() -> int:
-    print(Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
-
     while True:
-        print("Please select a number from 1 to 4 to make your choice.")
-        print("1. Login")
-        print("2. Registration")
-        print("3. Statistics")
-        print("4. Exit")
+        print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+        print("Please select a number from 1 to 5 to make your choice.")
+        print("1. Rules")
+        print("2. Login")
+        print("3. Registration")
+        print("4. Statistics")
+        print("5. Exit")
 
         choice = input("Enter your choice: ")
         if choice == "1":
+            banner.print_rules()
+        elif choice == "2":
             user_id = login()
             if user_id is not None:  # Check if login was successful
                 return user_id
-        elif choice == "2":
+        elif choice == "3":
             user_id = register_user()
             if user_id is not None:  # Check if login was successful
                 return user_id
-        elif choice == "3":
-            statistics()
-            print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
-            continue
         elif choice == "4":
+            statistics()
+            continue
+        elif choice == "5":
             print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
             sys.exit(1)
         else:
@@ -60,7 +61,6 @@ def login():
         username = input("Enter your username: ")
 
         if username == "0":
-            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
             return
 
         cursor = connection.cursor()
@@ -107,7 +107,6 @@ def register_user():
     while True:
         user_name = input("Enter your name: ")
         if user_name == "0":
-            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
             return
 
         # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
