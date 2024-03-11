@@ -97,6 +97,38 @@ def login():
         else:
             print(Fore.LIGHTRED_EX + "Sorry, wrong username or password. Try again." + Style.RESET_ALL)
 
+def check_game_end(game_id: int):
+    cursor = connection.cursor()
+
+#Haetaan pelin tiedot tietokannasta
+    cursor.execute(f"SELECT target_location, co2_consumed, flights_num FROM game WHERE id = {game_id}")
+    game_data = cursor.fetchone()
+
+    if game_data is None:
+        print("Game information is missing.")
+        return
+
+    target_location = game_data[0]
+    co2_consumed = game_data[1]
+    flights_num = game_data[2]
+
+    # Haetaan  sijainti
+    cursor.execute(f"SELECT current_location FROM game WHERE id = {game_id}")
+    player_location = cursor.fetchone()
+
+    if player_location is None:
+        print("The player's location is missing.")
+        return
+
+    if player_location[0] == target_location:
+        print("Congratulations, you found the owner!")
+        print("Game results:")
+        print(f"CO2 emissions caused by the player: {co2_consumed} kg")
+        print(f"Number of flights taken: {flights_num}")
+        print("The game ends.")
+
+    cursor.close()
+
 
 def register_user():
     """
