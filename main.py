@@ -4,6 +4,7 @@ from geopy.distance import distance
 import banner
 import random
 from colorama import Fore, Back, Style
+from pygame import mixer
 
 try:
     connection = mysql.connector.connect(
@@ -19,16 +20,23 @@ except mysql.connector.Error as error:
     print("Error while connecting to MySQL:", error)
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
+music_on = True
+mixer.init()
+
 
 def menu() -> int:
+    global music_on
+    start_music(music_on, "menu")
     while True:
+        mixer.music.unpause() if music_on else mixer.music.pause()
         print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
-        print("Please select a number from 1 to 5 to make your choice.")
+        print("Please select a number from 1 to 6 to make your choice.")
         print("1. Rules")
         print("2. Login")
         print("3. Registration")
         print("4. Statistics")
-        print("5. Exit")
+        print("5. Background Music: \033[92mON\033[0m") if music_on else print("5. Background Music: \033[91mOFF\033[0m")  # ON green OFF red
+        print("6. Exit")
 
         choice = input("Enter your choice: ")
         if choice == "1":
@@ -45,6 +53,8 @@ def menu() -> int:
             statistics()
             continue
         elif choice == "5":
+            music_on = False if music_on else True
+        elif choice == "6":
             print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
             sys.exit(1)
         else:
@@ -202,7 +212,19 @@ def statistics() -> None:
     print(f" Average flight amount   | \033[92m{flights_average:.1f}\033[0m") # color and tab to see better
     print(line)
 
-    input("Press \033[96m[ENTER]\033[0m to continue...\n")  # cian color
+    input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color
+
+
+def start_music(on, file):
+    """
+    Music source (no attribution required):\n
+    1. Menu Theme -- https://www.chosic.com/download-audio/24520/ \n
+    2. Game Theme -- https://www.chosic.com/download-audio/28670/ \n
+    3. Win Theme -- https://www.chosic.com/download-audio/28488/
+    """
+    if on:
+        mixer.music.load(f"music/{file}.mp3")
+        mixer.music.play(loops=-1)
 
 
 def airport_input(game_id: int) -> str:
@@ -492,6 +514,7 @@ def create_game(player_id: int) -> int:
 
 
 def game(game_id: int) -> bool:
+    start_music(music_on, "game")
     cursor = connection.cursor()
 
     # Get the target location and distance to it from the database
@@ -515,7 +538,7 @@ def game(game_id: int) -> bool:
         current_location = airport_input(game_id)
         if current_location == "back_to_menu":
             print("\033[94mYour progress is saved! Back to main menu ...\033[0m")  # green color: \033[94m, end-color: \033[0m
-            input("Press \033[96m[ENTER]\033[0m to continue...\n")  # cian color: \033[96m
+            input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color: \033[94m
             return False
 
         distance = distance_calcs(current_location, target_location)
@@ -527,6 +550,7 @@ def game(game_id: int) -> bool:
         cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
 
         if current_location == target_location:
+            start_music(music_on, "win")
             print("You won!")
             update_query = """
             UPDATE game SET completed = %s WHERE id = %s;
