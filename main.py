@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='MetroSuomi2024',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -27,35 +27,42 @@ def menu() -> int:
         print("Please select a number from 1 to 4 to make your choice.")
         print("1. Login")
         print("2. Registration")
-        print("3. Exit")
-        print("4. Statistics")
+        print("3. Statistics")
+        print("4. Exit")
 
         choice = input("Enter your choice: ")
         if choice == "1":
             user_id = login()
-            return user_id
+            if user_id is not None:  # Check if login was successful
+                return user_id
         elif choice == "2":
             user_id = register_user()
-            return user_id
+            if user_id is not None:  # Check if login was successful
+                return user_id
         elif choice == "3":
-            print("You've chosen to exit the game. We hope to see you again soon!")
-            sys.exit(1)
-        elif choice == "4":
             statistics()
-            input("Press [ENTER] to continue...")
-            continue # fixed because recursion didn't work right
+            print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+            continue
+        elif choice == "4":
+            print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
+            sys.exit(1)
         else:
             print(Fore.LIGHTRED_EX + f"Incorrect! Select the number from 1 to 4, please try again!" + Style.RESET_ALL)
             continue
 
 
-def login() -> int:
+def login():
     """
     login user
     """
     print("\n"+Back.LIGHTGREEN_EX + Fore.BLACK + " LOGIN USER " + Style.RESET_ALL)
     while True:
         username = input("Enter your username: ")
+
+        if username == "0":
+            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+            return
+
         cursor = connection.cursor()
         username_check_sql = f"SELECT * FROM player WHERE name='{username}'"
         cursor.execute(username_check_sql)
@@ -63,8 +70,7 @@ def login() -> int:
         if len(username_check_result) == 0:
             choice = input("Sorry, wrong username! Do you want to register instead? (y/n)").lower()
             if choice == "y":
-                register_user() # not correct - try firstly login, then type register instead, then try register, after that look game table in sql - no player_id
-                break
+                return register_user()
             elif choice == "n":
                 continue
             else:
@@ -73,6 +79,10 @@ def login() -> int:
 
         password = input("Enter your password: ")
 
+        if password == "0":
+            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+            return
+
         sql = "SELECT * FROM player WHERE name=%s AND password=%s"
         val = (username, password)
 
@@ -80,7 +90,7 @@ def login() -> int:
         result = cursor.fetchall()
 
         if result:
-            print(Fore.LIGHTGREEN_EX + f"User {username} successfully logged in!" + Style.RESET_ALL + "\n")
+            print(Fore.LIGHTGREEN_EX + f"You are successfully logged in!" + Style.RESET_ALL + "\n")
             user_id = result[0][0]
             return user_id
 
@@ -88,7 +98,7 @@ def login() -> int:
             print(Fore.LIGHTRED_EX + "Sorry, wrong username or password. Try again." + Style.RESET_ALL)
 
 
-def register_user() -> int:
+def register_user():
     """
     register new user
     """
@@ -96,6 +106,10 @@ def register_user() -> int:
 
     while True:
         user_name = input("Enter your name: ")
+        if user_name == "0":
+            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+            return
+
         # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
         if len(user_name) < 3 or len(user_name) > 20: # changed 6 to 4 minimum because 6 is too long
             print(Fore.LIGHTRED_EX + "Username must be between 3 and 20 characters long." + Style.RESET_ALL)
@@ -113,6 +127,10 @@ def register_user() -> int:
             break
 
     password = input("Enter your password: ")
+    if password == "0":
+        print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
+        return
+
     # Check if password length is less than 4, prompt until valid input is provided
     while len(password) < 4:
         print("Password must be at least 4 characters long.")
@@ -140,14 +158,16 @@ def statistics() -> None:
     """
     result = database_query("SELECT AVG(co2_consumed), AVG(flights_num), COUNT(*) FROM game WHERE completed = 1")
     co2_average, flights_average, game_count = result[0]
-    print(Back.LIGHTGREEN_EX + Fore.BLACK + "STATISTICS" + Style.RESET_ALL)
+    print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " STATISTICS " + Style.RESET_ALL)
     if game_count == 0 or co2_average is None or flights_average is None:
         print("\nNo statistics available.\n")
         return
 
-    print(f"\nStatistics for all {game_count} completed games:")
+    print(f"Statistics for all {game_count} completed games:")
     print(f"Average co2 consumption: {co2_average:.1f}")
     print(f"Average flight amount: {flights_average:.1f}\n")
+
+    input("Press [ENTER] to continue...")
 
 
 def airport_input(game_id: int) -> str:
@@ -162,7 +182,7 @@ def airport_input(game_id: int) -> str:
     while True:
 
         # Selection of continent
-        print("\nAvailable continents:")
+        print("Available continents:")
         for i in range(0, len(continents)):
             continent = continents[i]
             continent_name = continent_names[continent[0]] if continent[0] in continent_names else continent[0]
@@ -190,6 +210,7 @@ def airport_input(game_id: int) -> str:
         selected_country_number = select_option(country_options, "Select country: ", "The country doesn't exist or can't be selected.")
 
         if selected_country_number == "0":
+            print("")
             continue
 
         selected_country = countries[int(selected_country_number) - 1][0]
@@ -211,6 +232,7 @@ def airport_input(game_id: int) -> str:
 
         print("")
         if selected_airport_number == "0":
+            print("")
             continue
 
         selected_airport = airports[int(selected_airport_number) - 1][0]
@@ -349,7 +371,7 @@ def print_game_state(game_id: int) -> None:
 
     # Print the current game state
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
-    print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL + "\n")
 
 
 def create_game(player_id: int) -> int:
@@ -373,7 +395,7 @@ def create_game(player_id: int) -> int:
         target_location = random.choice(airports)
 
     distance = distance_calcs(current_location, target_location)
-    flights_num = 0                               # set flights_num as 0 at the beginning
+    flights_num = 0                             # set flights_num as 0 at the beginning
     emissions = 0                               # set emissions as 0 at the beginning
 
     # new row in game table
@@ -443,7 +465,7 @@ def main_game() -> None:
     """
     main game flow
     """
-    banner.printBanner()  # to print banner (code is in the file "banner") (commented during testing)
+    banner.printBanner()
 
     # menu loop (ends only if user press 3 ("exit") in menu)
     while True:
@@ -454,6 +476,7 @@ def main_game() -> None:
         while play_again != "n":
             game(create_game(user_id))
             play_again = input("Do you want to play again (y/n)?: ").lower()
+            print("")
 
 
 main_game()
