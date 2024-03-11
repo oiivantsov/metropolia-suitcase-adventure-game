@@ -33,14 +33,16 @@ You're a lost suitcase. {color.UNDERLINE}{color.BOLD}Your task{color.END} is to 
 Choose the airport carefully – the fewer flights, the less emissions into the atmosphere!
 {MENU_COLOR}{color.BOLD}Game start{color.END}:
 To start the game, select {color.UNDERLINE}{color.BOLD}Login (2){color.END} in the main menu if you already have an account, or {color.UNDERLINE}{color.BOLD}Registration (3){color.END} to create an account. 
-During logging, enter {color.CYAN}0{color.END} at any time if you want to return to the main menu.
+During logging, enter {color.CYAN}{color.BOLD}0{color.END} at any time if you want to return to the main menu.
 {MENU_COLOR}{color.BOLD}Game play{color.END}:
 To select an airport, follow the prompts of the game. {color.UNDERLINE}{color.BOLD}The distance{color.END} to the owner will tell you which continent, country or airport is better to choose.
-To save your progress and go to the main menu, enter {color.CYAN}menu{color.END} at any time when choosing a direction.
+To save your progress and go to the main menu, enter {color.CYAN}{color.BOLD}menu{color.END} at any time when choosing a direction.
 {MENU_COLOR}{color.BOLD}Winning{color.END}:
 The game ends if you guess the location of your owner. After that you can choose to start a new game, or return to the main menu.
 {MENU_COLOR}{color.BOLD}Statistics{color.END}:
 To compare your result with game average results of all players, select the {color.UNDERLINE}{color.BOLD}Statistics{color.END} option in the main menu.
+{MENU_COLOR}{color.BOLD}Music{color.END}:
+To turn off / turn on background music, choose {color.UNDERLINE}{color.BOLD}Background Music{color.END} option in the main menu, or enter {color.CYAN}{color.BOLD}music{color.END} at any time during the game.
 {MENU_COLOR}{color.BOLD}Program exit{color.END}:
 To close the program, select {color.UNDERLINE}{color.BOLD}Exit{color.END} from the main menu.
 """

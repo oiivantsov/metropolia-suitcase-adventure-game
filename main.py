@@ -61,7 +61,7 @@ def menu() -> int:
             print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
             sys.exit(1)
         else:
-            print(Fore.LIGHTRED_EX + f"Incorrect! Select the number from 1 to 4, please try again!" + Style.RESET_ALL)
+            print(Fore.LIGHTRED_EX + f"Incorrect! Select the number from 1 to 6, please try again!" + Style.RESET_ALL)
             continue
 
 
@@ -315,11 +315,16 @@ def select_option(options: list, input_message: str, error_message: str) -> str:
     If the input in lower case is not in the options list, the function reads input again and displays the error message.
     Returns the input when it is in the options list.
     """
+    global music_on
     options.append("menu")  # always an option to write "menu"
     while True:
         selected_country = input(input_message)
         if selected_country.lower() in options:
             return selected_country
+        elif selected_country.lower() == "music":
+            music_on = False if music_on else True
+            mixer.music.unpause() if music_on else mixer.music.pause()
+            continue
 
         print(error_message)
 
