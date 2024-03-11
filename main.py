@@ -11,7 +11,7 @@ try:
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='MetroSuomi2024',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -121,11 +121,13 @@ def check_game_end(game_id: int):
         return
 
     if player_location[0] == target_location:
-        print("Congratulations, you found the owner!")
-        print("Game results:")
-        print(f"CO2 emissions caused by the player: {co2_consumed} kg")
-        print(f"Number of flights taken: {flights_num}")
-        print("The game ends.")
+        print(Fore.BLACK + Back.LIGHTYELLOW_EX + " Congratulations, you found the owner! " + Style.RESET_ALL)
+        print(Back.WHITE + Fore.LIGHTWHITE_EX + " Game results: " + Style.RESET_ALL)
+        print(Back.WHITE + Fore.LIGHTWHITE_EX + f" Number of flights taken: {flights_num} "+ Style.RESET_ALL)
+        print(Back.WHITE + Fore.LIGHTWHITE_EX + f" CO2 emissions caused by the player: {co2_consumed} kg "+ Style.RESET_ALL)
+        print(f"Emitting {co2_consumed} kg of CO2 is roughly equivalent to the weight of about {co2_consumed/5:.0f} standard bicycles.")
+        print("")
+        print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL + "\n")
 
     cursor.close()
 
@@ -434,7 +436,7 @@ def start_game(player_id: int) -> bool:
     # If the player has an unfinished game (or games), ask if the player wants to continue it or start a new game and delete the previous game
     if len(result) > 0:
         print("You have currently an unfinished game. You can continue it or start a new one. Starting a new game will delete the previous one.")
-        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", "Invalid input!")
+        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", Fore.LIGHTRED_EX+"Invalid input! Enter \"y\" or \"n\"."+Style.RESET_ALL)
         print()
 
         if selected_option == "y":
@@ -527,7 +529,7 @@ def game(game_id: int) -> bool:
         cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
 
         if current_location == target_location:
-            print("You won!")
+            check_game_end(game_id)
             update_query = """
             UPDATE game SET completed = %s WHERE id = %s;
             """
