@@ -1,9 +1,13 @@
+from typing import Optional
+
 import mysql.connector
 import sys
 from geopy.distance import distance
 import banner
 import random
 from colorama import Fore, Back, Style
+import wikipedia
+import re
 
 try:
     connection = mysql.connector.connect(
@@ -418,6 +422,36 @@ def print_game_state(game_id: int) -> None:
     # Print the current game state
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
     print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL + "\n")
+
+    # Print a short info text about the airport if it is found from Wikipedia
+    wikipedia_summary = get_wikipedia_summary(player_location[0][1])
+    if wikipedia_summary is not None:
+        print(Fore.BLUE + wikipedia_summary + Style.RESET_ALL + "\n")
+
+
+def get_wikipedia_summary(airport_name: str) -> Optional[str]:
+    """
+    Searches the given airport name from Wikipedia and returns a short summary of the airport.
+    If the airport article is not found or getting data from Wikipedia fails, the function returns None.
+    :param airport_name:
+    :return:
+    """
+
+    # Search the airport name from Wikipedia and get the list of words in the first 3 sentences of the article summary
+    # Return None if getting data from Wikipedia failed
+    try:
+        summary_words = re.sub("\\.([a-zA-Z])", ". \\1", wikipedia.summary(airport_name, sentences=3).replace("\n", " ")).split(" ")
+    except wikipedia.exceptions.WikipediaException:
+        return None
+
+    # Construct the summary text from the list of words with new line every 20 words
+    summary = ""
+    for i in range(len(summary_words)):
+        if (i + 1) % 20 == 0:
+            summary += "\n"
+        summary += f"{summary_words[i]} "
+
+    return summary
 
 
 def start_game(player_id: int) -> bool:
