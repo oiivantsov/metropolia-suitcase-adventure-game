@@ -247,6 +247,8 @@ def airport_input(game_id: int) -> str:
             continent_name = continent_names[continent[0]] if continent[0] in continent_names else continent[0]
             print(f"{i + 1}. {continent_name}")
 
+        print('\n"menu": save progress and back to menu\n"music": turn on/off the music')
+
         #print("\nEnter the continent you want to fly to. Use the number of the continent.\n")
         print("")
 
@@ -264,6 +266,8 @@ def airport_input(game_id: int) -> str:
         for i in range(0, len(countries)):
             country = countries[i]
             print(f"{i + 1}. {country[1]}")
+
+        print('\n"menu": save progress and back to menu\n"music": turn on/off the music')
 
         #print("\nEnter the country you want to fly to. Use the number of the country.")
         print("")
@@ -288,6 +292,8 @@ def airport_input(game_id: int) -> str:
         for i in range(0, len(airports)):
             airport = airports[i]
             print(f"{i + 1}. {airport[1]} ({airport[2]})")
+
+        print('\n"menu": save progress and back to menu\n"music": turn on/off the music')
 
         #print("\nEnter the airport you want to fly to. Use the number of the airport.")
         #print("Enter 0 if you want to go back to entering continent.\n")
