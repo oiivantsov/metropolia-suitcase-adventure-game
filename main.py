@@ -211,6 +211,7 @@ def airport_input(game_id: int) -> str:
     """
     continents = database_query(f"SELECT country.continent FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) GROUP BY country.continent")
     continent_options = [str(i) for i in range(1, len(continents) + 1)]
+    continent_options.append("menu")
     continent_names = {"AF": "Africa", "AS": "Asia", "EU": "Europe", "NA": "North America", "OC": "Oceania", "SA": "South America"}
 
     while True:
@@ -242,6 +243,7 @@ def airport_input(game_id: int) -> str:
         print("")
 
         country_options = [str(i) for i in range(0, len(countries) + 1)]
+        country_options.append("menu")
         selected_country_number = select_option(country_options, "Select country: ", f"{Fore.LIGHTRED_EX}The country doesn't exist or can't be selected.{Style.RESET_ALL}")
 
         if selected_country_number == "0":
@@ -264,6 +266,7 @@ def airport_input(game_id: int) -> str:
         print("")
 
         airport_options = [str(i) for i in range(0, len(airports) + 1)]
+        airport_options.append("menu")
         selected_airport_number = select_option(airport_options, "Select airport: ", f"{Fore.LIGHTRED_EX}The airport doesn't exist or can't be selected.{Style.RESET_ALL}")
 
         print("")
@@ -284,7 +287,7 @@ def select_option(options: list, input_message: str, error_message: str) -> str:
     If the input in lower case is not in the options list, the function reads input again and displays the error message.
     Returns the input when it is in the options list.
     """
-    options.append("menu")  # always an option to write "menu"
+
     while True:
         selected_country = input(input_message)
         if selected_country.lower() in options:
@@ -428,7 +431,7 @@ def start_game(player_id: int) -> bool:
     # If the player has an unfinished game (or games), ask if the player wants to continue it or start a new game and delete the previous game
     if len(result) > 0:
         print("You have currently an unfinished game. You can continue it or start a new one. Starting a new game will delete the previous one.")
-        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", "Invalid input!")
+        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", f"{Fore.LIGHTRED_EX}Invalid input!{Style.RESET_ALL}")
         print()
 
         if selected_option == "y":
