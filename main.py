@@ -106,7 +106,7 @@ def check_game_end(game_id: int):
 
     if game_data is None:
         print(f"{Fore.LIGHTRED_EX}Game information is missing.{Style.RESET_ALL}")
-        return
+        sys.exit(1)
 
     target_location = game_data[0]
     co2_consumed = game_data[1]
@@ -118,7 +118,7 @@ def check_game_end(game_id: int):
 
     if player_location is None:
         print(f"{Fore.LIGHTRED_EX}The player's location is missing.{Style.RESET_ALL}")
-        return
+        sys.exit(1)
 
     if player_location[0] == target_location:
         print("Congratulations, you found the owner!")
@@ -338,7 +338,7 @@ def distance_calcs(icao1: str, icao2: str) -> float:
             coordinates.append((myresult[0][0], myresult[0][1]))
         else:
             print(f"{Fore.LIGHTRED_EX}ICAO code is missing from database!{Style.RESET_ALL}")
-            return False
+            sys.exit()
 
     return distance(coordinates[0], coordinates[1]).km
 
