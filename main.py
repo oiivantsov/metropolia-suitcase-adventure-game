@@ -123,9 +123,13 @@ def check_game_end(game_id: int):
     if player_location[0] == target_location:
         print(Fore.BLACK + Back.LIGHTYELLOW_EX + " Congratulations, you found the owner! " + Style.RESET_ALL)
         print(Back.WHITE + Fore.LIGHTWHITE_EX + " Game results: " + Style.RESET_ALL)
-        print(Back.WHITE + Fore.LIGHTWHITE_EX + f" Number of flights taken: {flights_num} "+ Style.RESET_ALL)
-        print(Back.WHITE + Fore.LIGHTWHITE_EX + f" CO2 emissions caused by the player: {co2_consumed} kg "+ Style.RESET_ALL)
-        print(f"Emitting {co2_consumed} kg of CO2 is roughly equivalent to the weight of about {co2_consumed/5:.0f} standard bicycles.")
+        print(" Number of flights taken: " + Fore.LIGHTGREEN_EX + f"{flights_num}" + Style.RESET_ALL)
+        print(" CO2 emissions caused by the player: " + Fore.LIGHTGREEN_EX + f"{co2_consumed} kg " + Style.RESET_ALL)
+        if co2_consumed > 1000:
+            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed /150:.0f} standard cars.")
+        else:
+            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/15:.0f} standard bicycles.")
+        print(Fore.LIGHTBLUE_EX + " Choose your trips mindfully, for a greener tomorrow."+ Style.RESET_ALL)
         print("")
         print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL + "\n")
 
@@ -228,7 +232,7 @@ def airport_input(game_id: int) -> str:
         #print("\nEnter the continent you want to fly to. Use the number of the continent.\n")
         print("")
 
-        selected_continent_number = select_option(continent_options, "Select continent: ", "The continent doesn't exist or can't be selected.")
+        selected_continent_number = select_option(continent_options, "Select continent: ", Fore.LIGHTRED_EX + "The continent doesn't exist or can't be selected." + Style.RESET_ALL)
 
         if selected_continent_number == "menu":
             return "back_to_menu"
@@ -248,7 +252,7 @@ def airport_input(game_id: int) -> str:
         #print("Enter 0 if you want to go back to entering continent.\n")
 
         country_options = [str(i) for i in range(0, len(countries) + 1)]
-        selected_country_number = select_option(country_options, "Select country: ", "The country doesn't exist or can't be selected.")
+        selected_country_number = select_option(country_options, "Select country: ", Fore.LIGHTRED_EX + "The country doesn't exist or can't be selected." + Style.RESET_ALL)
 
         if selected_country_number == "0":
             print("")
@@ -272,7 +276,7 @@ def airport_input(game_id: int) -> str:
         print("")
 
         airport_options = [str(i) for i in range(0, len(airports) + 1)]
-        selected_airport_number = select_option(airport_options, "Select airport: ", "The airport doesn't exist or can't be selected.")
+        selected_airport_number = select_option(airport_options, "Select airport: ", Fore.LIGHTRED_EX + "The airport doesn't exist or can't be selected." + Style.RESET_ALL)
 
         print("")
         if selected_airport_number == "0":
