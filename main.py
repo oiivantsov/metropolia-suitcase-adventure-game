@@ -29,7 +29,7 @@ mixer.init()
 
 def menu() -> int:
     global music_on
-    start_music(music_on, "menu")
+    start_music("menu")
     while True:
         mixer.music.unpause() if music_on else mixer.music.pause()
         print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
@@ -218,16 +218,15 @@ def statistics() -> None:
     input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color
 
 
-def start_music(on, file):
+def start_music(file):
     """
     Music source (no attribution required):\n
     1. Menu Theme -- https://www.chosic.com/download-audio/24520/ \n
     2. Game Theme -- https://www.chosic.com/download-audio/28670/ \n
     3. Win Theme -- https://www.chosic.com/download-audio/28488/
     """
-    if on:
-        mixer.music.load(f"music/{file}.mp3")
-        mixer.music.play(loops=-1)
+    mixer.music.load(f"music/{file}.mp3")
+    mixer.music.play(loops=-1)
 
 
 def airport_input(game_id: int) -> str:
@@ -522,7 +521,8 @@ def create_game(player_id: int) -> int:
 
 
 def game(game_id: int) -> bool:
-    start_music(music_on, "game")
+    start_music("game")
+    mixer.music.unpause() if music_on else mixer.music.pause()
     cursor = connection.cursor()
 
     # Get the target location and distance to it from the database
@@ -558,7 +558,8 @@ def game(game_id: int) -> bool:
         cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
 
         if current_location == target_location:
-            start_music(music_on, "win")
+            start_music("win")
+            mixer.music.unpause() if music_on else mixer.music.pause()
             print("You won!")
             update_query = """
             UPDATE game SET completed = %s WHERE id = %s;
