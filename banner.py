@@ -50,4 +50,4 @@ To close the program, select {color.UNDERLINE}{color.BOLD}Exit{color.END} from t
 
 def print_rules():
     print(rules)
-    input("Press \033[94m[ENTER]\033[0m to continue...\n")  # cian color
+    input("Press \033[96m[ENTER]\033[0m to continue...")  # cian color
