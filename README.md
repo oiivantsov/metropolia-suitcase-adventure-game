@@ -14,8 +14,7 @@ Suitcase Adventure is a game that combines entertainment with environmental educ
 
 ## :electric_plug: Modules
 * geopy
-* mysql
+* mysql-connector-python
 * wikipedia
 * colorama
-* mysql-connector-python
 * typing
