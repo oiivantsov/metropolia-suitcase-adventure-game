@@ -16,7 +16,7 @@ try:
     )
     # print("Database connected successfully!")  # we can comment this line later
 except mysql.connector.Error as error:
-    print("Error while connecting to MySQL:", error)
+    print(f"{Fore.LIGHTRED_EX}Error while connecting to MySQL: {error}{Style.RESET_ALL}")
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
 
@@ -68,19 +68,18 @@ def login():
         cursor.execute(username_check_sql)
         username_check_result = cursor.fetchall()
         if len(username_check_result) == 0:
-            choice = input("Sorry, wrong username! Do you want to register instead? (y/n)").lower()
+            choice = input(f"{Fore.LIGHTRED_EX}Sorry, wrong username! {Style.RESET_ALL}Do you want to register instead? (y/n)").lower()
             if choice == "y":
                 return register_user()
             elif choice == "n":
                 continue
             else:
-                print("Sorry, wrong choice. Enter correct username to login.")
+                print(f"{Fore.LIGHTRED_EX}Sorry, wrong choice. Enter correct username to login.{Style.RESET_ALL}")
                 continue
 
         password = input("Enter your password: ")
 
         if password == "0":
-            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
             return
 
         sql = "SELECT * FROM player WHERE name=%s AND password=%s"
@@ -97,27 +96,28 @@ def login():
         else:
             print(Fore.LIGHTRED_EX + "Sorry, wrong username or password. Try again." + Style.RESET_ALL)
 
+
 def check_game_end(game_id: int):
     cursor = connection.cursor()
 
-#Haetaan pelin tiedot tietokannasta
+    # Fetch game data from the database
     cursor.execute(f"SELECT target_location, co2_consumed, flights_num FROM game WHERE id = {game_id}")
     game_data = cursor.fetchone()
 
     if game_data is None:
-        print("Game information is missing.")
+        print(f"{Fore.LIGHTRED_EX}Game information is missing.{Style.RESET_ALL}")
         return
 
     target_location = game_data[0]
     co2_consumed = game_data[1]
     flights_num = game_data[2]
 
-    # Haetaan  sijainti
+    # Fetch the current location
     cursor.execute(f"SELECT current_location FROM game WHERE id = {game_id}")
     player_location = cursor.fetchone()
 
     if player_location is None:
-        print("The player's location is missing.")
+        print(f"{Fore.LIGHTRED_EX}The player's location is missing.{Style.RESET_ALL}")
         return
 
     if player_location[0] == target_location:
@@ -159,12 +159,11 @@ def register_user():
 
     password = input("Enter your password: ")
     if password == "0":
-        print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
         return
 
     # Check if password length is less than 4, prompt until valid input is provided
     while len(password) < 4:
-        print("Password must be at least 4 characters long.")
+        print(f"{Fore.LIGHTRED_EX}Password must be at least 4 characters long.{Style.RESET_ALL}")
         password = input("Enter your password: ")
 
     # Find the maximum id value currently in use
@@ -223,10 +222,9 @@ def airport_input(game_id: int) -> str:
             continent_name = continent_names[continent[0]] if continent[0] in continent_names else continent[0]
             print(f"{i + 1}. {continent_name}")
 
-        #print("\nEnter the continent you want to fly to. Use the number of the continent.\n")
         print("")
 
-        selected_continent_number = select_option(continent_options, "Select continent: ", "The continent doesn't exist or can't be selected.")
+        selected_continent_number = select_option(continent_options, "Select continent: ", f"{Fore.LIGHTRED_EX}The continent doesn't exist or can't be selected.{Style.RESET_ALL}")
 
         if selected_continent_number == "menu":
             return "back_to_menu"
@@ -241,12 +239,10 @@ def airport_input(game_id: int) -> str:
             country = countries[i]
             print(f"{i + 1}. {country[1]}")
 
-        #print("\nEnter the country you want to fly to. Use the number of the country.")
         print("")
-        #print("Enter 0 if you want to go back to entering continent.\n")
 
         country_options = [str(i) for i in range(0, len(countries) + 1)]
-        selected_country_number = select_option(country_options, "Select country: ", "The country doesn't exist or can't be selected.")
+        selected_country_number = select_option(country_options, "Select country: ", f"{Fore.LIGHTRED_EX}The country doesn't exist or can't be selected.{Style.RESET_ALL}")
 
         if selected_country_number == "0":
             print("")
@@ -265,12 +261,10 @@ def airport_input(game_id: int) -> str:
             airport = airports[i]
             print(f"{i + 1}. {airport[1]} ({airport[2]})")
 
-        #print("\nEnter the airport you want to fly to. Use the number of the airport.")
-        #print("Enter 0 if you want to go back to entering continent.\n")
         print("")
 
         airport_options = [str(i) for i in range(0, len(airports) + 1)]
-        selected_airport_number = select_option(airport_options, "Select airport: ", "The airport doesn't exist or can't be selected.")
+        selected_airport_number = select_option(airport_options, "Select airport: ", f"{Fore.LIGHTRED_EX}The airport doesn't exist or can't be selected.{Style.RESET_ALL}")
 
         print("")
         if selected_airport_number == "0":
@@ -309,7 +303,7 @@ def database_query(sql: str) -> list:
         cursor.execute(sql)
         result = cursor.fetchall()
     except mysql.connector.Error as error:
-        print(f"Error while executing query in database: {error}")
+        print(f"{Fore.LIGHTRED_EX}Error while executing query in database: {error}{Style.RESET_ALL}")
         sys.exit(1)
 
     cursor.close()
@@ -340,7 +334,7 @@ def distance_calcs(icao1: str, icao2: str) -> float:
         if mycursor.rowcount > 0:
             coordinates.append((myresult[0][0], myresult[0][1]))
         else:
-            print("ICAO code is missing from database!")
+            print(f"{Fore.LIGHTRED_EX}ICAO code is missing from database!{Style.RESET_ALL}")
             return False
 
     return distance(coordinates[0], coordinates[1]).km
@@ -377,7 +371,7 @@ def fetch_random_large() -> list:
         return available_airports
 
     except mysql.connector.Error as err:
-        print("Something went wrong: {}".format(err))
+        print(Fore.LIGHTRED_EX + "Something went wrong: {}".format(err) + Style.RESET_ALL)
         return []
 
 
@@ -406,13 +400,13 @@ def print_game_state(game_id: int) -> None:
     """
     player_location = database_query(f"SELECT airport.ident, airport.name, country.name, country.continent, airport.municipality FROM airport INNER JOIN country ON airport.iso_country = country.iso_country INNER JOIN game ON game.current_location = airport.ident WHERE game.id = {game_id}")
     if len(player_location) != 1:
-        print("Error while loading your current airport data.")
+        print(f"{Fore.LIGHTRED_EX}Error while loading your current airport data.{Style.RESET_ALL}")
         sys.exit(1)
 
     # Get data for the target location in the current game
     target_location = database_query(f"SELECT airport.ident FROM airport INNER JOIN game ON airport.ident = game.target_location WHERE game.id = {game_id}")
     if len(target_location) != 1:
-        print("Error while loading your target airport data.")
+        print(f"{Fore.LIGHTRED_EX}Error while loading your target airport data.{Style.RESET_ALL}")
         sys.exit(1)
 
     # Print the current game state
@@ -499,7 +493,7 @@ def game(game_id: int) -> bool:
     target_location_result = cursor.fetchall()
 
     if len(target_location_result) != 1:
-        print("Error while loading your target airport data.")
+        print(f"{Fore.LIGHTRED_EX}Error while loading your target airport data.{Style.RESET_ALL}")
         sys.exit(1)
 
     target_location = target_location_result[0][0]
