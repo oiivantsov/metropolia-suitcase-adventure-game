@@ -547,7 +547,7 @@ def main_game() -> None:
         # play-again loop
         play_again = ""
         while play_again != "n" and start_game(user_id):
-            play_again = input("Do you want to play again (y/n)?: ").lower()
+            play_again = select_option(["y", "n"], "Do you want to play again (y/n)?: ", f"{Fore.LIGHTRED_EX}Invalid input!{Style.RESET_ALL}")
             print("")
 
 
