@@ -5,13 +5,17 @@ import banner
 import random
 from colorama import Fore, Back, Style
 
+import contextlib
+with contextlib.redirect_stdout(None):
+    from pygame import mixer
+
 try:
     connection = mysql.connector.connect(
         host='127.0.0.1',
         port=3306,
         database='suitcase_game',
         user='root',  # change it to your username
-        password='metro0',  # change it to your password
+        password='MetroSuomi2024',  # change it to your password
         autocommit=True
     )
     # print("Database connected successfully!")  # we can comment this line later
@@ -19,16 +23,23 @@ except mysql.connector.Error as error:
     print(f"{Fore.LIGHTRED_EX}Error while connecting to MySQL: {error}{Style.RESET_ALL}")
     sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
+music_on = True
+mixer.init()
+
 
 def menu() -> int:
+    global music_on
+    start_music("menu")
     while True:
+        mixer.music.unpause() if music_on else mixer.music.pause()
         print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " MENU " + Style.RESET_ALL)
-        print("Please select a number from 1 to 5 to make your choice.")
+        print("Please select a number from 1 to 6 to make your choice.")
         print("1. Rules")
         print("2. Login")
         print("3. Registration")
         print("4. Statistics")
-        print("5. Exit")
+        print("5. Background Music: \033[92mON\033[0m") if music_on else print("5. Background Music: \033[91mOFF\033[0m")  # ON green OFF red
+        print("6. Exit")
 
         choice = input("Enter your choice: ")
         if choice == "1":
@@ -45,10 +56,12 @@ def menu() -> int:
             statistics()
             continue
         elif choice == "5":
+            music_on = False if music_on else True
+        elif choice == "6":
             print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
             sys.exit(1)
         else:
-            print(Fore.LIGHTRED_EX + f"Incorrect! Select the number from 1 to 4, please try again!" + Style.RESET_ALL)
+            print(Fore.LIGHTRED_EX + f"Incorrect! Select the number from 1 to 6, please try again!" + Style.RESET_ALL)
             continue
 
 
@@ -121,11 +134,17 @@ def check_game_end(game_id: int):
         sys.exit(1)
 
     if player_location[0] == target_location:
-        print("Congratulations, you found the owner!")
-        print("Game results:")
-        print(f"CO2 emissions caused by the player: {co2_consumed} kg")
-        print(f"Number of flights taken: {flights_num}")
-        print("The game ends.")
+        print(Fore.BLACK + Back.LIGHTYELLOW_EX + " Congratulations, you found the owner! " + Style.RESET_ALL)
+        print(Back.WHITE + Fore.LIGHTWHITE_EX + " Game results: " + Style.RESET_ALL)
+        print(" Number of flights taken: " + Fore.LIGHTGREEN_EX + f"{flights_num}" + Style.RESET_ALL)
+        print(" CO2 emissions caused by the player: " + Fore.LIGHTGREEN_EX + f"{co2_consumed} kg " + Style.RESET_ALL)
+        if co2_consumed > 1000:
+            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed /150:.0f} standard cars.")
+        else:
+            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/15:.0f} standard bicycles.")
+        print(Fore.LIGHTBLUE_EX + " Choose your trips mindfully, for a greener tomorrow."+ Style.RESET_ALL)
+        print("")
+        print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL + "\n")
 
     cursor.close()
 
@@ -201,7 +220,18 @@ def statistics() -> None:
     print(f" Average flight amount   | \033[92m{flights_average:.1f}\033[0m") # color and tab to see better
     print(line)
 
-    input("Press \033[96m[ENTER]\033[0m to continue...\n")  # cian color
+    input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color
+
+
+def start_music(file):
+    """
+    Music source (no attribution required):\n
+    1. Menu Theme -- https://www.chosic.com/download-audio/24520/ \n
+    2. Game Theme -- https://www.chosic.com/download-audio/28670/ \n
+    3. Win Theme -- https://www.chosic.com/download-audio/28488/
+    """
+    mixer.music.load(f"music/{file}.mp3")
+    mixer.music.play(loops=-1)
 
 
 def airport_input(game_id: int) -> str:
@@ -223,9 +253,9 @@ def airport_input(game_id: int) -> str:
             continent_name = continent_names[continent[0]] if continent[0] in continent_names else continent[0]
             print(f"{i + 1}. {continent_name}")
 
-        print("")
+        print('\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
 
-        selected_continent_number = select_option(continent_options, "Select continent: ", f"{Fore.LIGHTRED_EX}The continent doesn't exist or can't be selected.{Style.RESET_ALL}")
+        selected_continent_number = select_option(continent_options, "Select continent: ", Fore.LIGHTRED_EX + "The continent doesn't exist or can't be selected." + Style.RESET_ALL)
 
         if selected_continent_number == "menu":
             return "back_to_menu"
@@ -240,11 +270,11 @@ def airport_input(game_id: int) -> str:
             country = countries[i]
             print(f"{i + 1}. {country[1]}")
 
-        print("")
+        print('\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
 
         country_options = [str(i) for i in range(0, len(countries) + 1)]
         country_options.append("menu")
-        selected_country_number = select_option(country_options, "Select country: ", f"{Fore.LIGHTRED_EX}The country doesn't exist or can't be selected.{Style.RESET_ALL}")
+        selected_country_number = select_option(country_options, "Select country: ", Fore.LIGHTRED_EX + "The country doesn't exist or can't be selected." + Style.RESET_ALL)
 
         if selected_country_number == "0":
             print("")
@@ -263,11 +293,11 @@ def airport_input(game_id: int) -> str:
             airport = airports[i]
             print(f"{i + 1}. {airport[1]} ({airport[2]})")
 
-        print("")
+        print('\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
 
         airport_options = [str(i) for i in range(0, len(airports) + 1)]
         airport_options.append("menu")
-        selected_airport_number = select_option(airport_options, "Select airport: ", f"{Fore.LIGHTRED_EX}The airport doesn't exist or can't be selected.{Style.RESET_ALL}")
+        selected_airport_number = select_option(airport_options, "Select airport: ", Fore.LIGHTRED_EX + "The airport doesn't exist or can't be selected." + Style.RESET_ALL)
 
         print("")
         if selected_airport_number == "0":
@@ -287,11 +317,17 @@ def select_option(options: list, input_message: str, error_message: str) -> str:
     If the input in lower case is not in the options list, the function reads input again and displays the error message.
     Returns the input when it is in the options list.
     """
-
+    
+    global music_on
+  
     while True:
         selected_country = input(input_message)
         if selected_country.lower() in options:
             return selected_country
+        elif selected_country.lower() == "music":
+            music_on = False if music_on else True
+            mixer.music.unpause() if music_on else mixer.music.pause()
+            continue
 
         print(error_message)
 
@@ -431,7 +467,7 @@ def start_game(player_id: int) -> bool:
     # If the player has an unfinished game (or games), ask if the player wants to continue it or start a new game and delete the previous game
     if len(result) > 0:
         print("You have currently an unfinished game. You can continue it or start a new one. Starting a new game will delete the previous one.")
-        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", f"{Fore.LIGHTRED_EX}Invalid input!{Style.RESET_ALL}")
+        selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", Fore.LIGHTRED_EX+"Invalid input! Enter \"y\" or \"n\"."+Style.RESET_ALL)
         print()
 
         if selected_option == "y":
@@ -489,6 +525,8 @@ def create_game(player_id: int) -> int:
 
 
 def game(game_id: int) -> bool:
+    start_music("game")
+    mixer.music.unpause() if music_on else mixer.music.pause()
     cursor = connection.cursor()
 
     # Get the target location and distance to it from the database
@@ -512,7 +550,7 @@ def game(game_id: int) -> bool:
         current_location = airport_input(game_id)
         if current_location == "back_to_menu":
             print("\033[94mYour progress is saved! Back to main menu ...\033[0m")  # green color: \033[94m, end-color: \033[0m
-            input("Press \033[96m[ENTER]\033[0m to continue...\n")  # cian color: \033[96m
+            input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color: \033[94m
             return False
 
         distance = distance_calcs(current_location, target_location)
@@ -524,7 +562,11 @@ def game(game_id: int) -> bool:
         cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
 
         if current_location == target_location:
-            print("You won!")
+            check_game_end(game_id)
+            
+            start_music("win")
+            mixer.music.unpause() if music_on else mixer.music.pause()
+
             update_query = """
             UPDATE game SET completed = %s WHERE id = %s;
             """
