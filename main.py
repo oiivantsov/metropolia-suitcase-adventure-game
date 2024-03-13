@@ -193,10 +193,15 @@ def register_user():
         input("\nPress \033[94m[ENTER]\033[0m to continue...")
         return
 
-    # Check if password length is less than 4, prompt until valid input is provided
-    while len(password) < 4:
-        print(f"{Fore.LIGHTRED_EX}Password must be at least 4 characters long.{Style.RESET_ALL}")
+    # Check if password length is less than 4 or more than 50, prompt until valid input is provided
+    while len(password) < 4 or len(password) > 50:
+        print(f"{Fore.LIGHTRED_EX}Password must be between 4 and 50 characters long.{Style.RESET_ALL}")
         password = input("Enter your password: ")
+
+        if password == "0":
+            print("\n\033[94mReturning to main menu ...\033[0m")
+            input("\nPress \033[94m[ENTER]\033[0m to continue...")
+            return
 
     # Find the maximum id value currently in use
     cursor = connection.cursor()
@@ -645,6 +650,7 @@ def main_game() -> None:
             play_again = select_option(["y", "n"], "Do you want to play again (y/n)?: ", f"{Fore.LIGHTRED_EX}Invalid input!{Style.RESET_ALL}")
             print("")
 
+        print("\033[92mIf you want to play again after exiting to the menu, please log in again.\033[0m\n")
         input("Press \033[94m[ENTER]\033[0m to continue...")
 
 
