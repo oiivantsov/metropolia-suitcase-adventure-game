@@ -147,8 +147,8 @@ def check_game_end(game_id: int):
         print(Back.WHITE + Fore.LIGHTWHITE_EX + " Game results: " + Style.RESET_ALL)
         print(" Number of flights taken: " + Fore.LIGHTGREEN_EX + f"{flights_num}" + Style.RESET_ALL)
         print(" CO2 emissions caused by the player: " + Fore.LIGHTGREEN_EX + f"{co2_consumed} kg " + Style.RESET_ALL)
-        if co2_consumed > 1000:
-            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed /150:.0f} standard cars.")
+        if co2_consumed >= 1400:
+            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/1400:.0f} standard cars.")
         else:
             print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/15:.0f} standard bicycles.")
         print(Fore.LIGHTBLUE_EX + " Choose your trips mindfully, for a greener tomorrow."+ Style.RESET_ALL)
