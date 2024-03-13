@@ -45,7 +45,7 @@ def menu() -> int:
         print("5. Background Music: \033[92mON\033[0m") if music_on else print("5. Background Music: \033[91mOFF\033[0m")  # ON green OFF red
         print("6. Exit")
 
-        choice = input("Enter your choice: ")
+        choice = input("\nEnter your choice: ")
         if choice == "1":
             banner.print_rules()
         elif choice == "2":
@@ -62,6 +62,7 @@ def menu() -> int:
         elif choice == "5":
             music_on = False if music_on else True
         elif choice == "6":
+            print("\n" + Back.LIGHTGREEN_EX + Fore.BLACK + " EXIT " + Style.RESET_ALL)
             print(Fore.LIGHTBLUE_EX + "You've chosen to exit the game. We hope to see you again soon!" + Style.RESET_ALL)
             sys.exit(1)
         else:
@@ -78,6 +79,8 @@ def login():
         username = input("Enter your username: ")
 
         if username == "0":
+            print("\n\033[94mReturning to main menu ...\033[0m")
+            input("\nPress \033[94m[ENTER]\033[0m to continue...")
             return
 
         cursor = connection.cursor()
@@ -85,7 +88,7 @@ def login():
         cursor.execute(username_check_sql)
         username_check_result = cursor.fetchall()
         if len(username_check_result) == 0:
-            choice = input(f"{Fore.LIGHTRED_EX}Sorry, wrong username! {Style.RESET_ALL}Do you want to register instead? (y/n)").lower()
+            choice = input(f"{Fore.LIGHTRED_EX}Sorry, wrong username! {Style.RESET_ALL}Do you want to register instead (y/n)?: ").lower()
             if choice == "y":
                 return register_user()
             elif choice == "n":
@@ -97,6 +100,8 @@ def login():
         password = input("Enter your password: ")
 
         if password == "0":
+            print("\n\033[94mReturning to main menu ...\033[0m")
+            input("\nPress \033[94m[ENTER]\033[0m to continue...")
             return
 
         sql = "SELECT * FROM player WHERE name=%s AND password=%s"
@@ -106,12 +111,12 @@ def login():
         result = cursor.fetchall()
 
         if result:
-            print(Fore.LIGHTGREEN_EX + f"You are successfully logged in!" + Style.RESET_ALL + "\n")
+            print(Fore.LIGHTGREEN_EX + f"\nYou are successfully logged in!" + Style.RESET_ALL + "\n")
             user_id = result[0][0]
             return user_id
 
         else:
-            print(Fore.LIGHTRED_EX + "Sorry, wrong username or password. Try again." + Style.RESET_ALL)
+            print(Fore.LIGHTRED_EX + "Sorry, wrong password. Try again." + Style.RESET_ALL)
 
 
 def check_game_end(game_id: int):
@@ -148,7 +153,7 @@ def check_game_end(game_id: int):
             print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/15:.0f} standard bicycles.")
         print(Fore.LIGHTBLUE_EX + " Choose your trips mindfully, for a greener tomorrow."+ Style.RESET_ALL)
         print("")
-        print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL + "\n")
+        print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL)
 
     cursor.close()
 
@@ -162,6 +167,8 @@ def register_user():
     while True:
         user_name = input("Enter your name: ")
         if user_name == "0":
+            print("\n\033[94mReturning to main menu ...\033[0m")
+            input("\nPress \033[94m[ENTER]\033[0m to continue...")
             return
 
         # Check if user_name length is less than 6 or greater than 20, prompt until valid input is provided
@@ -182,6 +189,8 @@ def register_user():
 
     password = input("Enter your password: ")
     if password == "0":
+        print("\n\033[94mReturning to main menu ...\033[0m")
+        input("\nPress \033[94m[ENTER]\033[0m to continue...")
         return
 
     # Check if password length is less than 4, prompt until valid input is provided
@@ -200,7 +209,7 @@ def register_user():
     # Insert the airport into the MySQL database
     insert_query = "INSERT INTO player (id, name, password) VALUES (%s, %s, %s)"
     cursor.execute(insert_query, (new_id, user_name, password))
-    print(Fore.LIGHTGREEN_EX + f"User {user_name} successfully registered (your password is: {password})." + Style.RESET_ALL + "\n")
+    print(Fore.LIGHTGREEN_EX + f"\nUser {user_name} successfully registered (your password is: {password})." + Style.RESET_ALL + "\n")
     cursor.close()
     return new_id
 
@@ -224,7 +233,7 @@ def statistics() -> None:
     print(f" Average flight amount   | \033[92m{flights_average:.1f}\033[0m") # color and tab to see better
     print(line)
 
-    input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color
+    input("\nPress \033[94m[ENTER]\033[0m to continue...")  # blue color
 
 
 def start_music(file):
@@ -251,6 +260,8 @@ def airport_input(game_id: int) -> str:
     while True:
 
         # Selection of continent
+        print(Back.BLUE + Fore.BLACK + " SELECT CONTINENT " + Style.RESET_ALL)
+
         print("Available continents:")
         for i in range(0, len(continents)):
             continent = continents[i]
@@ -269,12 +280,14 @@ def airport_input(game_id: int) -> str:
         # Selection of country
         countries = database_query(f"SELECT country.iso_country, country.name FROM airport INNER JOIN country ON airport.iso_country = country.iso_country WHERE airport.ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND airport.ident NOT IN (SELECT current_location FROM game WHERE id = {game_id}) AND country.continent = '{selected_continent}' GROUP BY country.iso_country")
 
-        print("\nAvailable countries in the selected continent:")
+        print("\n" + Back.BLUE + Fore.BLACK + " SELECT COUNTRY " + Style.RESET_ALL)
+
+        print("Available countries in the selected continent:")
         for i in range(0, len(countries)):
             country = countries[i]
             print(f"{i + 1}. {country[1]}")
 
-        print('\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
+        print('\n"0":     return to continent selection\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
 
         country_options = [str(i) for i in range(0, len(countries) + 1)]
         country_options.append("menu")
@@ -292,24 +305,27 @@ def airport_input(game_id: int) -> str:
         # Selection of airport
         airports = database_query(f"SELECT ident, name, municipality FROM airport WHERE iso_country = '{selected_country}' AND ident IN (SELECT airport_ident FROM available_airport WHERE game_id = {game_id}) AND ident NOT IN (SELECT current_location FROM game WHERE id = {game_id})")
 
-        print("\nAvailable airports in the selected country:")
+        print("\n" + Back.BLUE + Fore.BLACK + " SELECT AIRPORT " + Style.RESET_ALL)
+
+        print("Available airports in the selected country:")
         for i in range(0, len(airports)):
             airport = airports[i]
             print(f"{i + 1}. {airport[1]} ({airport[2]})")
 
-        print('\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
+        print('\n"0":     return to continent selection\n"menu":  save progress and back to menu\n"music": turn on/off the music\n')
 
         airport_options = [str(i) for i in range(0, len(airports) + 1)]
         airport_options.append("menu")
         selected_airport_number = select_option(airport_options, "Select airport: ", Fore.LIGHTRED_EX + "The airport doesn't exist or can't be selected." + Style.RESET_ALL)
 
-        print("")
         if selected_airport_number == "0":
             print("")
             continue
 
         elif selected_airport_number == "menu":
             return "back_to_menu"
+
+        print("")
 
         selected_airport = airports[int(selected_airport_number) - 1][0]
         return selected_airport
@@ -331,6 +347,7 @@ def select_option(options: list, input_message: str, error_message: str) -> str:
         elif selected_country.lower() == "music":
             music_on = False if music_on else True
             mixer.music.unpause() if music_on else mixer.music.pause()
+            print("\033[94mBackground Music: \033[92mON\033[0m") if music_on else print("\033[94mBackground Music: \033[91mOFF\033[0m")  # ON green OFF red
             continue
 
         print(error_message)
@@ -453,6 +470,7 @@ def print_game_state(game_id: int) -> None:
         sys.exit(1)
 
     # Print the current game state
+    print(Back.BLUE + Fore.BLACK + " YOUR LOCATION " + Style.RESET_ALL)
     print(Back.WHITE + Fore.LIGHTWHITE_EX + f" You are currently at {player_location[0][1]}, located in {player_location[0][4]}, {player_location[0][2]} ({player_location[0][3]}). " + Style.RESET_ALL)
     print(Back.WHITE + Fore.LIGHTWHITE_EX + " The distance to your owner is " + Fore.BLACK + Back.LIGHTYELLOW_EX + f" {distance_calcs(player_location[0][0], target_location[0][0]):.0f} "+Back.WHITE + Fore.LIGHTWHITE_EX + " km. " + Style.RESET_ALL + "\n")
 
@@ -500,6 +518,7 @@ def start_game(player_id: int) -> bool:
 
     # If the player has an unfinished game (or games), ask if the player wants to continue it or start a new game and delete the previous game
     if len(result) > 0:
+        print(Back.LIGHTGREEN_EX + Fore.BLACK + " CONTINUE OR START A NEW GAME " + Style.RESET_ALL)
         print("You have currently an unfinished game. You can continue it or start a new one. Starting a new game will delete the previous one.")
         selected_option = select_option(["y", "n"], "Do you want to continue the previous game (y/n)?: ", Fore.LIGHTRED_EX+"Invalid input! Enter \"y\" or \"n\"."+Style.RESET_ALL)
         print()
@@ -575,6 +594,7 @@ def game(game_id: int) -> bool:
     distance = target_location_result[0][1]
 
     print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME START " + Style.RESET_ALL)
+    print("The game will start now ...\n")
 
     # Game loop
     while True:
@@ -583,8 +603,7 @@ def game(game_id: int) -> bool:
 
         current_location = airport_input(game_id)
         if current_location == "back_to_menu":
-            print("\033[94mYour progress is saved! Back to main menu ...\033[0m")  # green color: \033[94m, end-color: \033[0m
-            input("Press \033[94m[ENTER]\033[0m to continue...\n")  # blue color: \033[94m
+            print("\n\033[94mYour progress is saved! Back to main menu ...\033[0m\n")  # green color: \033[94m, end-color: \033[0m
             return False
 
         distance = distance_calcs(current_location, target_location)
@@ -625,6 +644,8 @@ def main_game() -> None:
         while play_again != "n" and start_game(user_id):
             play_again = select_option(["y", "n"], "Do you want to play again (y/n)?: ", f"{Fore.LIGHTRED_EX}Invalid input!{Style.RESET_ALL}")
             print("")
+
+        input("Press \033[94m[ENTER]\033[0m to continue...")
 
 
 main_game()
