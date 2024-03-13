@@ -14,9 +14,35 @@ Airports on the map: https://viktoriia-code.github.io/map-airport/
 * Programming language: Python
 * Database: SQL
 
+## :wrench: Installation
+1. Clone the Suitcase Adventure repository from GitHub:
+```
+git clone https://github.com/Viktoriia-code/suitcase-adventure-game.git
+```
+2. Navigate to the project directory:
+```
+cd suitcase-adventure-game
+```
+3. Install the required Python packages using pip:
+```
+pip install -r requirements.txt
+```
+4. Replace the password at the connection with your own database password
+```
+connection = mysql.connector.connect(
+        host='127.0.0.1',
+        port=3306,
+        database='suitcase_game',
+        user='root',
+        password='YOUR_DATABASE_PASSWORD_HERE',  # replace it with your database password
+        autocommit=True
+    )
+```
+
 ## :electric_plug: Modules
 * geopy
 * mysql-connector-python
 * wikipedia
 * colorama
-* typing
+* pygame
+* playsound
