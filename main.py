@@ -602,8 +602,7 @@ def game(game_id: int) -> bool:
 
         current_location = airport_input(game_id)
         if current_location == "back_to_menu":
-            print("\n\033[94mYour progress is saved! Back to main menu ...\033[0m")  # green color: \033[94m, end-color: \033[0m
-            input("\nPress \033[94m[ENTER]\033[0m to continue...")  # blue color: \033[94m
+            print("\n\033[94mYour progress is saved! Back to main menu ...\033[0m\n")  # green color: \033[94m, end-color: \033[0m
             return False
 
         distance = distance_calcs(current_location, target_location)
