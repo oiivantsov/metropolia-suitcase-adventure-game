@@ -502,21 +502,33 @@ def get_wikipedia_summary(airport_name: str) -> Optional[str]:
     else:
         search_query = airport_name
 
-    # Search the search query from Wikipedia and get the list of words in the first 3 sentences of the article summary
+    # Search the search query from Wikipedia and get the summary and url of the article
     # Return None if getting data from Wikipedia failed
     try:
-        summary_words = re.sub("\\.([a-zA-Z])", ". \\1", wikipedia.summary(search_query, sentences=3).replace("\n", " ")).split(" ")
+        wikipedia_article = wikipedia.page(search_query)
+        summary = re.sub("\\.([a-zA-Z])", ". \\1", wikipedia_article.summary.replace("\n", " "))
+        url = wikipedia_article.url
     except wikipedia.exceptions.WikipediaException:
         return None
 
+    # Get the first 3 sentences of the summary
+    sentences = summary.split(". ")
+    first_sentences = ". ".join(sentences[:min(len(sentences), 3)])
+    if not first_sentences.endswith("."):
+        first_sentences += "."
+
     # Construct the summary text from the list of words with new line every 20 words
-    summary = ""
+    summary_words = first_sentences.split(" ")
+    summary_with_line_breaks = ""
     for i in range(len(summary_words)):
         if (i + 1) % 20 == 0:
-            summary += "\n"
-        summary += f"{summary_words[i]} "
+            summary_with_line_breaks += "\n"
+        summary_with_line_breaks += f"{summary_words[i]} "
 
-    return summary
+    # Add the source URL to the text (due to copyright reasons)
+    summary_with_line_breaks += f"\nSource: {url}"
+
+    return summary_with_line_breaks
 
 
 def start_game(player_id: int) -> bool:
