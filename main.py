@@ -347,6 +347,7 @@ def select_option(options: list, input_message: str, error_message: str) -> str:
         elif selected_country.lower() == "music":
             music_on = False if music_on else True
             mixer.music.unpause() if music_on else mixer.music.pause()
+            print("\033[94mBackground Music: \033[92mON\033[0m") if music_on else print("\033[94mBackground Music: \033[91mOFF\033[0m")  # ON green OFF red
             continue
 
         print(error_message)
