@@ -119,43 +119,49 @@ def login():
             print(Fore.LIGHTRED_EX + "Sorry, wrong password. Try again." + Style.RESET_ALL)
 
 
-def check_game_end(game_id: int):
+def game_end(game_id: int) -> None:
+    """
+    Updates the game state to completed, starts the win music and prints win texts.
+    :param game_id:
+    :return:
+    """
     cursor = connection.cursor()
 
     # Fetch game data from the database
-    cursor.execute(f"SELECT target_location, co2_consumed, flights_num FROM game WHERE id = {game_id}")
+    cursor.execute(f"SELECT co2_consumed, flights_num FROM game WHERE id = {game_id}")
     game_data = cursor.fetchone()
 
     if game_data is None:
         print(f"{Fore.LIGHTRED_EX}Game information is missing.{Style.RESET_ALL}")
         sys.exit(1)
 
-    target_location = game_data[0]
-    co2_consumed = game_data[1]
-    flights_num = game_data[2]
+    co2_consumed = game_data[0]
+    flights_num = game_data[1]
 
-    # Fetch the current location
-    cursor.execute(f"SELECT current_location FROM game WHERE id = {game_id}")
-    player_location = cursor.fetchone()
-
-    if player_location is None:
-        print(f"{Fore.LIGHTRED_EX}The player's location is missing.{Style.RESET_ALL}")
-        sys.exit(1)
-
-    if player_location[0] == target_location:
-        print(Fore.BLACK + Back.LIGHTYELLOW_EX + " Congratulations, you found the owner! " + Style.RESET_ALL)
-        print(Back.WHITE + Fore.LIGHTWHITE_EX + " Game results: " + Style.RESET_ALL)
-        print(" Number of flights taken: " + Fore.LIGHTGREEN_EX + f"{flights_num}" + Style.RESET_ALL)
-        print(" CO2 emissions caused by the player: " + Fore.LIGHTGREEN_EX + f"{co2_consumed} kg " + Style.RESET_ALL)
-        if co2_consumed >= 1400:
-            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/1400:.0f} standard cars.")
-        else:
-            print(" Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed/15:.0f} standard bicycles.")
-        print(Fore.LIGHTBLUE_EX + " Choose your trips mindfully, for a greener tomorrow."+ Style.RESET_ALL)
-        print("")
-        print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL)
+    # Update the game data as the game is completed
+    cursor.execute("UPDATE game SET completed = %s WHERE id = %s", (1, game_id))
+    cursor.execute(f"DELETE FROM available_airport WHERE game_id = {game_id}")
 
     cursor.close()
+
+    # Start the win music
+    start_music("win")
+    mixer.music.unpause() if music_on else mixer.music.pause()
+
+    # Print the win texts
+    print(Fore.BLACK + Back.LIGHTYELLOW_EX + " Congratulations, you found the owner! " + Style.RESET_ALL)
+    print(Back.WHITE + Fore.LIGHTWHITE_EX + " Game results: " + Style.RESET_ALL)
+    print(" Number of flights taken: " + Fore.LIGHTGREEN_EX + f"{flights_num}" + Style.RESET_ALL)
+    print(" CO2 emissions caused by the player: " + Fore.LIGHTGREEN_EX + f"{co2_consumed} kg " + Style.RESET_ALL)
+    if co2_consumed >= 1400:
+        print(
+            " Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed / 1400:.0f} standard cars.")
+    else:
+        print(
+            " Your emitting is roughly equivalent to the weight of about " + Fore.LIGHTGREEN_EX + f"{co2_consumed / 15:.0f} standard bicycles.")
+    print(Fore.LIGHTBLUE_EX + " Choose your trips mindfully, for a greener tomorrow." + Style.RESET_ALL)
+    print("")
+    print(Back.LIGHTGREEN_EX + Fore.BLACK + " GAME END " + Style.RESET_ALL)
 
 
 def register_user():
@@ -641,17 +647,7 @@ def game(game_id: int) -> bool:
         cursor.execute(update_query, (current_location, target_location, emissions, 1, distance, game_id))
 
         if current_location == target_location:
-            check_game_end(game_id)
-            
-            start_music("win")
-            mixer.music.unpause() if music_on else mixer.music.pause()
-
-            update_query = """
-            UPDATE game SET completed = %s WHERE id = %s;
-            """
-            cursor.execute(update_query, (1, game_id))
-            cursor.execute(f"DELETE FROM available_airport WHERE game_id = {game_id}")
-            cursor.close()
+            game_end(game_id)
             return True
 
 
