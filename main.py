@@ -506,7 +506,7 @@ def get_wikipedia_summary(airport_name: str) -> Optional[str]:
     # Return None if getting data from Wikipedia failed
     try:
         wikipedia_article = wikipedia.page(search_query)
-        summary = re.sub("\\.([a-zA-Z])", ". \\1", wikipedia_article.summary.replace("\n", " "))
+        summary = re.sub(" +", " ", re.sub("\\.([a-zA-Z])", ". \\1", wikipedia_article.summary.replace("\n", " ")))
         url = wikipedia_article.url
     except wikipedia.exceptions.WikipediaException:
         return None
